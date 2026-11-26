@@ -19,6 +19,7 @@
       --muted: #94a3b8;
       --primary: #3b82f6;
       --primary-hover: #2563eb;
+      --occupied: #d97706;
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
@@ -93,6 +94,7 @@
     }
     button:active { transform: scale(0.97); }
     .btn-primary { background: var(--primary); color: #fff; }
+    .btn-occupied { background: var(--occupied); color: #fff; }
     .btn-success { background: var(--success); color: #052e16; }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-warning { background: var(--warning); color: #451a03; }
@@ -112,14 +114,15 @@
     /* Boxes control */
     .box-item {
       background: var(--card-alt); border: 1px solid var(--border); border-radius: 10px;
-      padding: 10px; display: flex; flex-direction: column; gap: 8px;
+      padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: 0.25s;
     }
+    .box-item.occupied { border-color: var(--warning); background: rgba(245, 158, 11, 0.12); }
     .box-item.locked { border-color: var(--danger); background: rgba(239, 68, 68, 0.12); }
     .box-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.92rem; }
     .badge { font-size: 0.7rem; padding: 2px 7px; border-radius: 999px; font-weight: 700; }
     .badge-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
     .badge-lock { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
-    .badge-pend { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    .badge-pend { background: rgba(245, 158, 11, 0.22); color: #fcd34d; }
 
     /* PIN List */
     .pin-card {
@@ -203,11 +206,11 @@
       <div>
         <label data-i18n="selectBox">Box / Sala assignada</label>
         <select id="selBox">
-          <option value="1">Box 1</option>
-          <option value="2">Box 2</option>
-          <option value="3">Box 3</option>
-          <option value="4">Box 4</option>
-          <option value="5">Box 5</option>
+          <option value="1">Box 1 (🟢 Lliure)</option>
+          <option value="2">Box 2 (🟢 Lliure)</option>
+          <option value="3">Box 3 (🟢 Lliure)</option>
+          <option value="4">Box 4 (🟢 Lliure)</option>
+          <option value="5">Box 5 (🟢 Lliure)</option>
         </select>
       </div>
       <div>
@@ -290,8 +293,8 @@
   // CONFIGURACIÓ BROKER EMQX CLOUD (WSS PORT 8084)
   // =========================================================================
   const BROKER_URL   = "wss://g868e77d.ala.eu-central-1.emqxsl.com:8084/mqtt";
-  const MQTT_USER    = "Jordi";       // Comprova que coincideix amb el de l'ESP32-S3
-  const MQTT_PASS    = "1923Jtlcom.";   // Contrasenya corresponent a EMQX
+  const MQTT_USER    = "Jordi";
+  const MQTT_PASS    = "1923Jtlcom.";
   const TOPIC_CMD    = "local/acceso/cmd";
   const TOPIC_EVENTS = "local/acceso/eventos";
 
@@ -323,6 +326,11 @@
       openBox: "Obrir",
       lockBox: "Bloquejar",
       unlockBox: "Activar",
+      boxFree: "LLIURE",
+      boxBusy: "OCUPAT",
+      selFree: "🟢 Lliure",
+      selBusy: "🟠 Ocupat",
+      confirmBusyBox: (box) => `El Box ${box} ja té un codi actiu en aquest moment. Vols crear-ne un altre igualment?`,
       activePinsTitle: "Codis actius al controlador",
       btnForceSync: "↻ Reenviar llista",
       liveEvents: "Registre d'activitat en viu",
@@ -364,6 +372,11 @@
       openBox: "Abrir",
       lockBox: "Bloquear",
       unlockBox: "Activar",
+      boxFree: "LIBRE",
+      boxBusy: "OCUPADO",
+      selFree: "🟢 Libre",
+      selBusy: "🟠 Ocupado",
+      confirmBusyBox: (box) => `El Box ${box} ya tiene un código activo en este momento. ¿Quieres crear otro igualmente?`,
       activePinsTitle: "Códigos activos en el controlador",
       btnForceSync: "↻ Reenviar lista",
       liveEvents: "Registro de actividad en vivo",
@@ -529,6 +542,11 @@
     document.getElementById("inpPin").value = pin;
   }
 
+  function isBoxOcupado(boxNum) {
+    const ahoraSec = Math.floor(Date.now() / 1000);
+    return accesos.some(a => a.box === boxNum && ahoraSec <= a.fin);
+  }
+
   function crearAcceso() {
     const box = parseInt(document.getElementById("selBox").value, 10);
     const mins = parseInt(document.getElementById("selDuration").value, 10);
@@ -538,6 +556,10 @@
     if (!/^\d{4,6}$/.test(pin)) {
       showToast("PIN: 4-6 dígits");
       return;
+    }
+
+    if (isBoxOcupado(box)) {
+      if (!confirm(I18N[lang].confirmBusyBox(box))) return;
     }
 
     const ahoraSec = Math.floor(Date.now() / 1000);
@@ -614,6 +636,20 @@
     publishCmd({ cmd: "bloquear_box", box, estado: boxBloqueado[box] });
   }
 
+  function actualizarSelectorBoxes() {
+    const t = I18N[lang];
+    const sel = document.getElementById("selBox");
+    const valActual = sel.value || "1";
+    let html = "";
+    for (let i = 1; i <= 5; i++) {
+      const ocupado = isBoxOcupado(i);
+      const estadoTxt = ocupado ? t.selBusy : t.selFree;
+      html += `<option value="${i}">Box ${i} (${estadoTxt})</option>`;
+    }
+    sel.innerHTML = html;
+    sel.value = valActual;
+  }
+
   function renderSecurity() {
     const t = I18N[lang];
     const sysBadge = document.getElementById("sysLockBadge");
@@ -627,20 +663,27 @@
     grid.innerHTML = "";
     for (let i = 1; i <= 5; i++) {
       const locked = boxBloqueado[i];
+      const ocupado = isBoxOcupado(i);
       const div = document.createElement("div");
-      div.className = "box-item" + (locked ? " locked" : "");
+      div.className = "box-item" + (locked ? " locked" : (ocupado ? " occupied" : ""));
+
+      const badgeClass = locked ? "badge-lock" : (ocupado ? "badge-pend" : "badge-ok");
+      const badgeText = locked ? "LOCK" : (ocupado ? t.boxBusy : t.boxFree);
+      const openBtnClass = ocupado ? "btn-occupied" : "btn-primary";
+
       div.innerHTML = `
         <div class="box-head">
           <span>Box ${i}</span>
-          <span class="badge ${locked ? "badge-lock" : "badge-ok"}">${locked ? "LOCK" : "OK"}</span>
+          <span class="badge ${badgeClass}">${badgeText}</span>
         </div>
-        <button class="btn-primary btn-sm" onclick="cmdAbrirBox(${i})">🚪 ${t.openBox}</button>
+        <button class="${openBtnClass} btn-sm" onclick="cmdAbrirBox(${i})">🚪 ${t.openBox}</button>
         <button class="${locked ? "btn-warning" : "btn-ghost"} btn-sm" onclick="toggleBoxLock(${i})">
           ${locked ? "🔓 " + t.unlockBox : "🔒 " + t.lockBox}
         </button>
       `;
       grid.appendChild(div);
     }
+    actualizarSelectorBoxes();
   }
 
   function renderPins() {
@@ -648,6 +691,7 @@
     const list = document.getElementById("pinsList");
     if (accesos.length === 0) {
       list.innerHTML = `<div style="color:var(--muted); font-size:0.85rem; text-align:center; padding:14px 0;">${t.noPins}</div>`;
+      renderSecurity();
       return;
     }
 
@@ -680,6 +724,7 @@
         </div>
       `;
     }).join("");
+    renderSecurity();
   }
 
   function renderLogs() {
@@ -734,6 +779,7 @@
   genRandomPin();
   setLang(lang);
   renderLogs();
+  setInterval(() => { renderPins(); }, 30000);
   initMQTT();
 </script>
 </body>
