@@ -130,7 +130,7 @@
       padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;
     }
     .pin-top { display: flex; justify-content: space-between; align-items: center; }
-    .pin-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.35rem; font-weight: 800; letter-spacing: 0.12em; color: #fff; }
+    .pin-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; color: #fff; }
     .pin-meta { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
     .pin-actions { display: flex; gap: 8px; margin-top: 2px; }
     .pin-actions button { flex: 1; }
@@ -199,18 +199,19 @@
 
 <div class="container">
 
-  <!-- 1. GENERAR NOU ACCÉS -->
+  <!-- 1. GENERAR NOU ACCÉS O CLAUER -->
   <section class="card">
-    <div class="card-title" data-i18n="newAccessTitle">Nou accés temporal</div>
+    <div class="card-title" data-i18n="newAccessTitle">Nou accés o clauer</div>
     <div class="form-row">
       <div>
-        <label data-i18n="selectBox">Box / Sala assignada</label>
+        <label data-i18n="selectBox">Destí d'accés</label>
         <select id="selBox">
           <option value="1">Box 1 (🟢 Lliure)</option>
           <option value="2">Box 2 (🟢 Lliure)</option>
           <option value="3">Box 3 (🟢 Lliure)</option>
           <option value="4">Box 4 (🟢 Lliure)</option>
           <option value="5">Box 5 (🟢 Lliure)</option>
+          <option value="0">🚪 Només Porta Principal (Clauer)</option>
         </select>
       </div>
       <div>
@@ -223,24 +224,25 @@
           <option value="1440" selected data-i18n="dur24h">24 hores (1 dia)</option>
           <option value="4320" data-i18n="dur3d">3 dies</option>
           <option value="10080" data-i18n="dur7d">7 dies</option>
+          <option value="5256000" data-i18n="durPerm">Permanent (Clauer / Fix)</option>
         </select>
       </div>
     </div>
     <div class="form-row">
       <div>
-        <label data-i18n="clientLabel">Nom client / nota (opcional)</label>
-        <input id="inpNote" type="text" placeholder="Ex: Joan / Reserva #12" />
+        <label data-i18n="clientLabel">Nom client / clauer (opcional)</label>
+        <input id="inpNote" type="text" placeholder="Ex: Joan / Clauer Pedro" />
       </div>
       <div>
-        <label data-i18n="pinLabel">Codi PIN (4 dígits)</label>
+        <label data-i18n="pinLabel">Codi PIN o ID Clauer</label>
         <div style="display:flex; gap:6px;">
-          <input id="inpPin" type="text" maxlength="6" inputmode="numeric" />
+          <input id="inpPin" type="text" maxlength="10" inputmode="numeric" />
           <button type="button" class="btn-ghost btn-sm" onclick="genRandomPin()" title="Generar PIN">🎲</button>
         </div>
       </div>
     </div>
     <button class="btn-primary" style="width:100%; margin-top:4px;" onclick="crearAcceso()" data-i18n="btnCreateSync">
-      Crear codi i enviar al controlador
+      Guardar i enviar al controlador
     </button>
   </section>
 
@@ -261,10 +263,10 @@
     <div class="grid-3" id="boxesGrid"></div>
   </section>
 
-  <!-- 3. CODIS ACTIUS -->
+  <!-- 3. CODIS I CLAUERS ACTIUS -->
   <section class="card">
     <div class="card-title">
-      <span data-i18n="activePinsTitle">Codis actius al controlador</span>
+      <span data-i18n="activePinsTitle">Codis i clauers actius</span>
       <button class="btn-ghost btn-sm" onclick="syncListaConESP32()" data-i18n="btnForceSync">↻ Reenviar llista</button>
     </div>
     <div id="pinsList"></div>
@@ -309,14 +311,15 @@
       connecting: "Connectant a EMQX...",
       connected: "Connectat a EMQX Cloud",
       disconnected: "Desconnectat - Reconnectant...",
-      newAccessTitle: "Nou accés temporal",
-      selectBox: "Box / Sala assignada",
+      newAccessTitle: "Nou accés o clauer",
+      selectBox: "Destí d'accés",
       duration: "Durada de l'accés",
       dur1h: "1 hora", dur2h: "2 hores", dur4h: "4 hores", dur8h: "8 hores",
       dur24h: "24 hores (1 dia)", dur3d: "3 dies", dur7d: "7 dies",
-      clientLabel: "Nom client / nota (opcional)",
-      pinLabel: "Codi PIN (4 dígits)",
-      btnCreateSync: "Crear codi i enviar al controlador",
+      durPerm: "Permanent (Clauer / Fix)",
+      clientLabel: "Nom client / clauer (opcional)",
+      pinLabel: "Codi PIN o ID Clauer",
+      btnCreateSync: "Guardar i enviar al controlador",
       remoteControl: "Obertura remota i bloquejos",
       sysActive: "SISTEMA ACTIU",
       sysLocked: "SISTEMA BLOQUEJAT",
@@ -330,21 +333,25 @@
       boxBusy: "OCUPAT",
       selFree: "🟢 Lliure",
       selBusy: "🟠 Ocupat",
+      selMainOnly: "🚪 Només Porta Principal (Clauer)",
+      mainDoorTag: "🚪 Porta Principal",
+      keyfobBadge: "Clauer / Fix",
       confirmBusyBox: (box) => `El Box ${box} ja té un codi actiu en aquest moment. Vols crear-ne un altre igualment?`,
-      activePinsTitle: "Codis actius al controlador",
+      activePinsTitle: "Codis i clauers actius",
       btnForceSync: "↻ Reenviar llista",
       liveEvents: "Registre d'activitat en viu",
       btnClear: "Netejar",
-      noPins: "Cap codi actiu. Crea'n un a dalt per començar.",
+      noPins: "Cap codi ni clauer actiu. Crea'n un a dalt per començar.",
       statusPending: "Pendent 1r ús",
       statusUsed: "En ús (reentrada activa)",
       statusExpired: "Caducat",
       validUntil: "Vàlid fins",
+      permanentText: "Accés permanent",
       btnWhatsApp: "Enviar WhatsApp",
       btnRevoke: "Revocar",
       toastSent: "Ordre enviada al controlador",
       toastSynced: "Llista sincronitzada amb l'ESP32-S3",
-      confirmRevoke: "Vols revocar aquest codi immediatament?",
+      confirmRevoke: "Vols eliminar aquest accés immediatament?",
       waMsg: (box, pin, finStr) =>
         `Hola! Aquí tens el teu codi d'accés per al *Box ${box}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de la tecla # al teclat exterior)_\n\n🚪 Aquest codi obre la *Porta Principal* i el *Box ${box}*.\n⏳ Vàlid fins: *${finStr}*.`
     },
@@ -355,14 +362,15 @@
       connecting: "Conectando a EMQX...",
       connected: "Conectado a EMQX Cloud",
       disconnected: "Desconectado - Reconectando...",
-      newAccessTitle: "Nuevo acceso temporal",
-      selectBox: "Box / Sala asignada",
+      newAccessTitle: "Nuevo acceso o llavero",
+      selectBox: "Destino de acceso",
       duration: "Duración del acceso",
       dur1h: "1 hora", dur2h: "2 horas", dur4h: "4 horas", dur8h: "8 horas",
       dur24h: "24 horas (1 día)", dur3d: "3 días", dur7d: "7 días",
-      clientLabel: "Nombre cliente / nota (opcional)",
-      pinLabel: "Código PIN (4 dígitos)",
-      btnCreateSync: "Crear código y enviar al controlador",
+      durPerm: "Permanente (Llavero / Fijo)",
+      clientLabel: "Nombre cliente / llavero (opcional)",
+      pinLabel: "Código PIN o ID Llavero",
+      btnCreateSync: "Guardar y enviar al controlador",
       remoteControl: "Apertura remota y bloqueos",
       sysActive: "SISTEMA ACTIVO",
       sysLocked: "SISTEMA BLOQUEADO",
@@ -376,21 +384,25 @@
       boxBusy: "OCUPADO",
       selFree: "🟢 Libre",
       selBusy: "🟠 Ocupado",
+      selMainOnly: "🚪 Solo Puerta Principal (Llavero)",
+      mainDoorTag: "🚪 Puerta Principal",
+      keyfobBadge: "Llavero / Fijo",
       confirmBusyBox: (box) => `El Box ${box} ya tiene un código activo en este momento. ¿Quieres crear otro igualmente?`,
-      activePinsTitle: "Códigos activos en el controlador",
+      activePinsTitle: "Códigos y llaveros activos",
       btnForceSync: "↻ Reenviar lista",
       liveEvents: "Registro de actividad en vivo",
       btnClear: "Limpiar",
-      noPins: "Ningún código activo. Crea uno arriba para empezar.",
+      noPins: "Ningún código ni llavero activo. Crea uno arriba para empezar.",
       statusPending: "Pendiente 1er uso",
       statusUsed: "En uso (reentrada activa)",
       statusExpired: "Caducado",
       validUntil: "Válido hasta",
+      permanentText: "Acceso permanente",
       btnWhatsApp: "Enviar WhatsApp",
       btnRevoke: "Revocar",
       toastSent: "Orden enviada al controlador",
       toastSynced: "Lista sincronizada con el ESP32-S3",
-      confirmRevoke: "¿Quieres revocar este código inmediatamente?",
+      confirmRevoke: "¿Quieres eliminar este acceso inmediatamente?",
       waMsg: (box, pin, finStr) =>
         `¡Hola! Aquí tienes tu código de acceso para el *Box ${box}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de la tecla # en el teclado exterior)_\n\n🚪 Este código abre la *Puerta Principal* y el *Box ${box}*.\n⏳ Válido hasta: *${finStr}*.`
     }
@@ -543,6 +555,7 @@
   }
 
   function isBoxOcupado(boxNum) {
+    if (boxNum < 1 || boxNum > 5) return false;
     const ahoraSec = Math.floor(Date.now() / 1000);
     return accesos.some(a => a.box === boxNum && ahoraSec <= a.fin);
   }
@@ -553,12 +566,12 @@
     const nota = document.getElementById("inpNote").value.trim();
     const pin = document.getElementById("inpPin").value.trim();
 
-    if (!/^\d{4,6}$/.test(pin)) {
-      showToast("PIN: 4-6 dígits");
+    if (!/^\d{4,10}$/.test(pin)) {
+      showToast("PIN / Clauer: 4-10 dígits");
       return;
     }
 
-    if (isBoxOcupado(box)) {
+    if (box >= 1 && isBoxOcupado(box)) {
       if (!confirm(I18N[lang].confirmBusyBox(box))) return;
     }
 
@@ -605,7 +618,7 @@
 
   function enviarWhatsApp(pin) {
     const acc = accesos.find(a => a.pin === pin);
-    if (!acc) return;
+    if (!acc || acc.box === 0) return;
     const finDate = new Date(acc.fin * 1000);
     const finStr = finDate.toLocaleString(lang === "ca" ? "ca-ES" : "es-ES", {
       day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
@@ -639,13 +652,14 @@
   function actualizarSelectorBoxes() {
     const t = I18N[lang];
     const sel = document.getElementById("selBox");
-    const valActual = sel.value || "1";
+    const valActual = sel.value !== "" ? sel.value : "1";
     let html = "";
     for (let i = 1; i <= 5; i++) {
       const ocupado = isBoxOcupado(i);
       const estadoTxt = ocupado ? t.selBusy : t.selFree;
       html += `<option value="${i}">Box ${i} (${estadoTxt})</option>`;
     }
+    html += `<option value="0">${t.selMainOnly}</option>`;
     sel.innerHTML = html;
     sel.value = valActual;
   }
@@ -697,28 +711,36 @@
 
     const ahoraSec = Math.floor(Date.now() / 1000);
     list.innerHTML = accesos.map(a => {
+      const esClauer = (a.box === 0);
+      const esPermanent = (a.fin - a.inicio) > (365 * 86400);
       const caducado = ahoraSec > a.fin;
       const finStr = new Date(a.fin * 1000).toLocaleString(lang === "ca" ? "ca-ES" : "es-ES", {
         day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
       });
+
       let badgeHtml = `<span class="badge badge-pend">${t.statusPending}</span>`;
       if (caducado) badgeHtml = `<span class="badge badge-lock">${t.statusExpired}</span>`;
+      else if (esClauer || esPermanent) badgeHtml = `<span class="badge badge-ok">${t.keyfobBadge}</span>`;
       else if (a.usado) badgeHtml = `<span class="badge badge-ok">${t.statusUsed}</span>`;
+
+      const destinoLabel = esClauer ? t.mainDoorTag : `Box ${a.box}`;
+      const codeDisplay = esClauer ? `🏷️ ${a.pin}` : `${a.pin}#`;
+      const validezDisplay = esPermanent ? t.permanentText : `${t.validUntil}: <strong>${finStr}</strong>`;
 
       return `
         <div class="pin-card" style="${caducado ? "opacity:0.6;" : ""}">
           <div class="pin-top">
             <div>
-              <span class="pin-code">${a.pin}#</span>
-              <span style="font-weight:700; color:#93c5fd; margin-left:8px;">Box ${a.box}</span>
+              <span class="pin-code">${codeDisplay}</span>
+              <span style="font-weight:700; color:${esClauer ? "#6ee7b7" : "#93c5fd"}; margin-left:8px;">${destinoLabel}</span>
             </div>
             ${badgeHtml}
           </div>
           <div class="pin-meta">
-            ${a.nota ? `<strong>${a.nota}</strong> · ` : ""}${t.validUntil}: <strong>${finStr}</strong>
+            ${a.nota ? `<strong>${a.nota}</strong> · ` : ""}${validezDisplay}
           </div>
           <div class="pin-actions">
-            <button class="btn-wa btn-sm" onclick="enviarWhatsApp('${a.pin}')">📲 ${t.btnWhatsApp}</button>
+            ${!esClauer ? `<button class="btn-wa btn-sm" onclick="enviarWhatsApp('${a.pin}')">📲 ${t.btnWhatsApp}</button>` : ""}
             <button class="btn-ghost btn-sm" style="color:#fca5a5;" onclick="revocarPin('${a.pin}')">🗑 ${t.btnRevoke}</button>
           </div>
         </div>
