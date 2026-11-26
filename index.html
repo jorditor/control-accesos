@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Control d'Accessos</title>
+  <link rel="manifest" href="manifest.json" />
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-alt: #273549;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --whatsapp: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 40px; }
+
+    /* Pantalla de bloqueig PIN Administrador */
+    #lockScreen {
+      position: fixed; inset: 0; z-index: 100;
+      background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .lock-box {
+      width: 100%; max-width: 340px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+      padding: 24px; text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+    }
+    .lock-icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .lock-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+    .lock-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 18px; }
+    .pin-dots {
+      display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
+    }
+    .pin-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--primary); background: transparent; transition: 0.15s;
+    }
+    .pin-dot.filled { background: var(--primary); transform: scale(1.1); }
+    .pin-dot.error { border-color: var(--danger); background: var(--danger); }
+    .keypad {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .key-btn {
+      background: var(--card-alt); color: var(--text); border: 1px solid var(--border);
+      border-radius: 12px; padding: 15px 0; font-size: 1.25rem; font-weight: 700;
+      cursor: pointer; user-select: none;
+    }
+    .key-btn:active { background: var(--primary); }
+
+    header {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 8px var(--danger); transition: 0.3s; }
+    .dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+    .sub-status { font-size: 0.72rem; color: var(--muted); }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .lang-switch { display: flex; background: var(--card); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+    .lang-btn {
+      background: transparent; color: var(--muted); border: none; padding: 6px 10px;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    }
+    .lang-btn.active { background: var(--primary); color: #fff; }
+    .container { max-width: 680px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+    .card-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    button {
+      border: none; border-radius: 10px; padding: 12px 14px; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: transform 0.08s, opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    button:active { transform: scale(0.97); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-success { background: var(--success); color: #052e16; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-warning { background: var(--warning); color: #451a03; }
+    .btn-ghost { background: var(--card-alt); color: var(--text); border: 1px solid var(--border); }
+    .btn-wa { background: var(--whatsapp); color: #052e16; font-weight: 700; }
+    .btn-sm { padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; }
+
+    /* Form */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+    select, input {
+      width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 12px; font-size: 0.95rem; outline: none;
+    }
+    select:focus, input:focus { border-color: var(--primary); }
+
+    /* Boxes control */
+    .box-item {
+      background: var(--card-alt); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .box-item.locked { border-color: var(--danger); background: rgba(239, 68, 68, 0.12); }
+    .box-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.92rem; }
+    .badge { font-size: 0.7rem; padding: 2px 7px; border-radius: 999px; font-weight: 700; }
+    .badge-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .badge-lock { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+    .badge-pend { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+
+    /* PIN List */
+    .pin-card {
+      background: var(--card-alt); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .pin-top { display: flex; justify-content: space-between; align-items: center; }
+    .pin-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.35rem; font-weight: 800; letter-spacing: 0.12em; color: #fff; }
+    .pin-meta { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+    .pin-actions { display: flex; gap: 8px; margin-top: 2px; }
+    .pin-actions button { flex: 1; }
+
+    /* Logs */
+    .log-list { max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .log-row { font-size: 0.78rem; background: var(--bg); padding: 8px 10px; border-radius: 8px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; gap: 8px; }
+    .log-row.err { border-left-color: var(--danger); }
+    .log-row.ok { border-left-color: var(--success); }
+    .toast {
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+      background: #020617; color: #fff; border: 1px solid var(--border);
+      padding: 10px 18px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.25s; z-index: 50;
+    }
+    .toast.show { opacity: 1; bottom: 26px; }
+  </style>
+</head>
+<body>
+
+<!-- PANTALLA DE BLOQUEIG ADMINISTRADOR -->
+<div id="lockScreen">
+  <div class="lock-box">
+    <div class="lock-icon">🔐</div>
+    <div class="lock-title" data-i18n="lockTitle">Accés Administrador</div>
+    <div class="lock-sub" data-i18n="lockSub">Introdueix el PIN de gestió</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="keypad">
+      <button class="key-btn" onclick="pressPin('1')">1</button>
+      <button class="key-btn" onclick="pressPin('2')">2</button>
+      <button class="key-btn" onclick="pressPin('3')">3</button>
+      <button class="key-btn" onclick="pressPin('4')">4</button>
+      <button class="key-btn" onclick="pressPin('5')">5</button>
+      <button class="key-btn" onclick="pressPin('6')">6</button>
+      <button class="key-btn" onclick="pressPin('7')">7</button>
+      <button class="key-btn" onclick="pressPin('8')">8</button>
+      <button class="key-btn" onclick="pressPin('9')">9</button>
+      <button class="key-btn" onclick="clearAdminPin()" style="font-size:0.9rem; color:var(--muted);">C</button>
+      <button class="key-btn" onclick="pressPin('0')">0</button>
+      <button class="key-btn" onclick="delAdminPin()" style="font-size:1rem;">⌫</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="brand">
+    <div id="connDot" class="dot"></div>
+    <div>
+      <h1 data-i18n="appTitle">Control d'Accessos</h1>
+      <div id="connText" class="sub-status" data-i18n="connecting">Connectant a EMQX...</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="lang-switch">
+      <button id="btnCa" class="lang-btn active" onclick="setLang('ca')">CA</button>
+      <button id="btnEs" class="lang-btn" onclick="setLang('es')">ES</button>
+    </div>
+    <button class="btn-ghost btn-sm" onclick="lockApp()" title="Bloquejar pantalla">🔒</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- 1. GENERAR NOU ACCÉS -->
+  <section class="card">
+    <div class="card-title" data-i18n="newAccessTitle">Nou accés temporal</div>
+    <div class="form-row">
+      <div>
+        <label data-i18n="selectBox">Box / Sala assignada</label>
+        <select id="selBox">
+          <option value="1">Box 1</option>
+          <option value="2">Box 2</option>
+          <option value="3">Box 3</option>
+          <option value="4">Box 4</option>
+          <option value="5">Box 5</option>
+        </select>
+      </div>
+      <div>
+        <label data-i18n="duration">Durada de l'accés</label>
+        <select id="selDuration">
+          <option value="60" data-i18n="dur1h">1 hora</option>
+          <option value="120" data-i18n="dur2h">2 hores</option>
+          <option value="240" data-i18n="dur4h">4 hores</option>
+          <option value="480" data-i18n="dur8h">8 hores</option>
+          <option value="1440" selected data-i18n="dur24h">24 hores (1 dia)</option>
+          <option value="4320" data-i18n="dur3d">3 dies</option>
+          <option value="10080" data-i18n="dur7d">7 dies</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label data-i18n="clientLabel">Nom client / nota (opcional)</label>
+        <input id="inpNote" type="text" placeholder="Ex: Joan / Reserva #12" />
+      </div>
+      <div>
+        <label data-i18n="pinLabel">Codi PIN (4 dígits)</label>
+        <div style="display:flex; gap:6px;">
+          <input id="inpPin" type="text" maxlength="6" inputmode="numeric" />
+          <button type="button" class="btn-ghost btn-sm" onclick="genRandomPin()" title="Generar PIN">🎲</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%; margin-top:4px;" onclick="crearAcceso()" data-i18n="btnCreateSync">
+      Crear codi i enviar al controlador
+    </button>
+  </section>
+
+  <!-- 2. OBERTURA MANUAL I BLOQUEIG GLOBAL -->
+  <section class="card">
+    <div class="card-title">
+      <span data-i18n="remoteControl">Obertura remota i bloquejos</span>
+      <span id="sysLockBadge" class="badge badge-ok" data-i18n="sysActive">SISTEMA ACTIU</span>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <button class="btn-success" onclick="cmdAbrirPrincipal()" data-i18n="btnOpenMain">
+        🚪 Obrir Porta Principal
+      </button>
+      <button id="btnSysLock" class="btn-danger" onclick="toggleSystemLock()" data-i18n="btnLockAll">
+        🔒 Bloquejar TOT
+      </button>
+    </div>
+    <div class="grid-3" id="boxesGrid"></div>
+  </section>
+
+  <!-- 3. CODIS ACTIUS -->
+  <section class="card">
+    <div class="card-title">
+      <span data-i18n="activePinsTitle">Codis actius al controlador</span>
+      <button class="btn-ghost btn-sm" onclick="syncListaConESP32()" data-i18n="btnForceSync">↻ Reenviar llista</button>
+    </div>
+    <div id="pinsList"></div>
+  </section>
+
+  <!-- 4. REGISTRE D'ESDEVENIMENTS EN VIU -->
+  <section class="card">
+    <div class="card-title">
+      <span data-i18n="liveEvents">Registre d'activitat en viu</span>
+      <button class="btn-ghost btn-sm" onclick="clearLogs()" data-i18n="btnClear">Netejar</button>
+    </div>
+    <div id="logList" class="log-list"></div>
+  </section>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  // =========================================================================
+  // PIN D'ADMINISTRADOR DE LA WEB APP (CANVIA'L AQUÍ SI VOLS)
+  // =========================================================================
+  const ADMIN_PIN = "2580";
+
+  // =========================================================================
+  // CONFIGURACIÓ BROKER EMQX CLOUD (WSS PORT 8084)
+  // =========================================================================
+  const BROKER_URL   = "wss://g868e77d.ala.eu-central-1.emqxsl.com:8084/mqtt";
+  const MQTT_USER    = "accesos";       // Comprova que coincideix amb el de l'ESP32-S3
+  const MQTT_PASS    = "Accesos2026";   // Contrasenya corresponent a EMQX
+  const TOPIC_CMD    = "local/acceso/cmd";
+  const TOPIC_EVENTS = "local/acceso/eventos";
+
+  // =========================================================================
+  // DICCIONARI BILINGÜE (CATALÀ / ESPAÑOL)
+  // =========================================================================
+  const I18N = {
+    ca: {
+      lockTitle: "Accés Administrador",
+      lockSub: "Introdueix el PIN de gestió",
+      appTitle: "Control d'Accessos",
+      connecting: "Connectant a EMQX...",
+      connected: "Connectat a EMQX Cloud",
+      disconnected: "Desconnectat - Reconnectant...",
+      newAccessTitle: "Nou accés temporal",
+      selectBox: "Box / Sala assignada",
+      duration: "Durada de l'accés",
+      dur1h: "1 hora", dur2h: "2 hores", dur4h: "4 hores", dur8h: "8 hores",
+      dur24h: "24 hores (1 dia)", dur3d: "3 dies", dur7d: "7 dies",
+      clientLabel: "Nom client / nota (opcional)",
+      pinLabel: "Codi PIN (4 dígits)",
+      btnCreateSync: "Crear codi i enviar al controlador",
+      remoteControl: "Obertura remota i bloquejos",
+      sysActive: "SISTEMA ACTIU",
+      sysLocked: "SISTEMA BLOQUEJAT",
+      btnOpenMain: "🚪 Obrir Porta Principal",
+      btnLockAll: "🔒 Bloquejar TOT",
+      btnUnlockAll: "🔓 Desbloquejar TOT",
+      openBox: "Obrir",
+      lockBox: "Bloquejar",
+      unlockBox: "Activar",
+      activePinsTitle: "Codis actius al controlador",
+      btnForceSync: "↻ Reenviar llista",
+      liveEvents: "Registre d'activitat en viu",
+      btnClear: "Netejar",
+      noPins: "Cap codi actiu. Crea'n un a dalt per començar.",
+      statusPending: "Pendent 1r ús",
+      statusUsed: "En ús (reentrada activa)",
+      statusExpired: "Caducat",
+      validUntil: "Vàlid fins",
+      btnWhatsApp: "Enviar WhatsApp",
+      btnRevoke: "Revocar",
+      toastSent: "Ordre enviada al controlador",
+      toastSynced: "Llista sincronitzada amb l'ESP32-S3",
+      confirmRevoke: "Vols revocar aquest codi immediatament?",
+      waMsg: (box, pin, finStr) =>
+        `Hola! Aquí tens el teu codi d'accés per al *Box ${box}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de la tecla # al teclat exterior)_\n\n🚪 Aquest codi obre la *Porta Principal* i el *Box ${box}*.\n⏳ Vàlid fins: *${finStr}*.`
+    },
+    es: {
+      lockTitle: "Acceso Administrador",
+      lockSub: "Introduce el PIN de gestión",
+      appTitle: "Control de Accesos",
+      connecting: "Conectando a EMQX...",
+      connected: "Conectado a EMQX Cloud",
+      disconnected: "Desconectado - Reconectando...",
+      newAccessTitle: "Nuevo acceso temporal",
+      selectBox: "Box / Sala asignada",
+      duration: "Duración del acceso",
+      dur1h: "1 hora", dur2h: "2 horas", dur4h: "4 horas", dur8h: "8 horas",
+      dur24h: "24 horas (1 día)", dur3d: "3 días", dur7d: "7 días",
+      clientLabel: "Nombre cliente / nota (opcional)",
+      pinLabel: "Código PIN (4 dígitos)",
+      btnCreateSync: "Crear código y enviar al controlador",
+      remoteControl: "Apertura remota y bloqueos",
+      sysActive: "SISTEMA ACTIVO",
+      sysLocked: "SISTEMA BLOQUEADO",
+      btnOpenMain: "🚪 Abrir Puerta Principal",
+      btnLockAll: "🔒 Bloquear TODO",
+      btnUnlockAll: "🔓 Desbloquear TODO",
+      openBox: "Abrir",
+      lockBox: "Bloquear",
+      unlockBox: "Activar",
+      activePinsTitle: "Códigos activos en el controlador",
+      btnForceSync: "↻ Reenviar lista",
+      liveEvents: "Registro de actividad en vivo",
+      btnClear: "Limpiar",
+      noPins: "Ningún código activo. Crea uno arriba para empezar.",
+      statusPending: "Pendiente 1er uso",
+      statusUsed: "En uso (reentrada activa)",
+      statusExpired: "Caducado",
+      validUntil: "Válido hasta",
+      btnWhatsApp: "Enviar WhatsApp",
+      btnRevoke: "Revocar",
+      toastSent: "Orden enviada al controlador",
+      toastSynced: "Lista sincronizada con el ESP32-S3",
+      confirmRevoke: "¿Quieres revocar este código inmediatamente?",
+      waMsg: (box, pin, finStr) =>
+        `¡Hola! Aquí tienes tu código de acceso para el *Box ${box}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de la tecla # en el teclado exterior)_\n\n🚪 Este código abre la *Puerta Principal* y el *Box ${box}*.\n⏳ Válido hasta: *${finStr}*.`
+    }
+  };
+
+  let lang = localStorage.getItem("pwa_lang") || "ca";
+  let accesos = JSON.parse(localStorage.getItem("pwa_accesos") || "[]");
+  let sistemaBloqueado = JSON.parse(localStorage.getItem("pwa_sys_lock") || "false");
+  let boxBloqueado = JSON.parse(localStorage.getItem("pwa_box_lock") || "[false,false,false,false,false,false]");
+  let logs = JSON.parse(localStorage.getItem("pwa_logs") || "[]");
+  let client = null;
+  let adminBuffer = "";
+
+  // =========================================================================
+  // LÒGICA PANTALLA BLOQUEIG ADMINISTRADOR
+  // =========================================================================
+  function updatePinDots(isError = false) {
+    const dots = document.querySelectorAll("#pinDots .pin-dot");
+    dots.forEach((d, idx) => {
+      d.classList.remove("filled", "error");
+      if (isError) d.classList.add("error");
+      else if (idx < adminBuffer.length) d.classList.add("filled");
+    });
+  }
+
+  function pressPin(digit) {
+    if (adminBuffer.length >= 4) return;
+    adminBuffer += digit;
+    updatePinDots(false);
+    if (adminBuffer.length === 4) {
+      if (adminBuffer === ADMIN_PIN) {
+        sessionStorage.setItem("pwa_unlocked", "1");
+        document.getElementById("lockScreen").style.display = "none";
+        adminBuffer = "";
+        updatePinDots(false);
+      } else {
+        updatePinDots(true);
+        setTimeout(() => {
+          adminBuffer = "";
+          updatePinDots(false);
+        }, 450);
+      }
+    }
+  }
+
+  function delAdminPin() {
+    adminBuffer = adminBuffer.slice(0, -1);
+    updatePinDots(false);
+  }
+
+  function clearAdminPin() {
+    adminBuffer = "";
+    updatePinDots(false);
+  }
+
+  function lockApp() {
+    sessionStorage.removeItem("pwa_unlocked");
+    adminBuffer = "";
+    updatePinDots(false);
+    document.getElementById("lockScreen").style.display = "flex";
+  }
+
+  if (sessionStorage.getItem("pwa_unlocked") === "1") {
+    document.getElementById("lockScreen").style.display = "none";
+  }
+
+  // =========================================================================
+  // INICIALITZACIÓ MQTT
+  // =========================================================================
+  function initMQTT() {
+    const clientId = "PWA_Admin_" + Math.random().toString(16).substring(2, 8);
+    client = mqtt.connect(BROKER_URL, {
+      clientId,
+      username: MQTT_USER,
+      password: MQTT_PASS,
+      reconnectPeriod: 3000,
+      clean: true
+    });
+
+    client.on("connect", () => {
+      document.getElementById("connDot").classList.add("online");
+      document.getElementById("connText").textContent = I18N[lang].connected;
+      client.subscribe(TOPIC_EVENTS);
+    });
+
+    client.on("close", () => {
+      document.getElementById("connDot").classList.remove("online");
+      document.getElementById("connText").textContent = I18N[lang].disconnected;
+    });
+
+    client.on("message", (topic, payload) => {
+      if (topic !== TOPIC_EVENTS) return;
+      try {
+        const ev = JSON.parse(payload.toString());
+        procesarEventoESP32(ev);
+      } catch (e) { console.error(e); }
+    });
+  }
+
+  function publishCmd(obj) {
+    if (!client || !client.connected) {
+      showToast("MQTT offline");
+      return false;
+    }
+    client.publish(TOPIC_CMD, JSON.stringify(obj), { qos: 1 });
+    return true;
+  }
+
+  function procesarEventoESP32(ev) {
+    if (ev.tipo === "primer_acceso" && ev.detalle) {
+      let changed = false;
+      accesos.forEach(a => {
+        if (a.pin === ev.detalle && !a.usado) { a.usado = true; changed = true; }
+      });
+      if (changed) {
+        saveState();
+        renderPins();
+      }
+    }
+    if (ev.tipo === "estado_bloqueo_sistema") {
+      sistemaBloqueado = (ev.detalle === "BLOQUEADO");
+      saveState();
+      renderSecurity();
+    }
+    if (ev.tipo === "estado_bloqueo_box" && ev.box >= 1 && ev.box <= 5) {
+      boxBloqueado[ev.box] = (ev.detalle === "BLOQUEADO");
+      saveState();
+      renderSecurity();
+    }
+
+    const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const isErr = ev.tipo.startsWith("denegado");
+    const isOk = ev.tipo.includes("acceso") || ev.tipo.includes("abre") || ev.tipo === "online";
+    logs.unshift({
+      hora,
+      texto: `${ev.tipo} ${ev.box ? `(Box ${ev.box})` : ""} — ${ev.detalle || ""}`,
+      cls: isErr ? "err" : (isOk ? "ok" : "")
+    });
+    if (logs.length > 40) logs.pop();
+    localStorage.setItem("pwa_logs", JSON.stringify(logs));
+    renderLogs();
+  }
+
+  function genRandomPin() {
+    let pin;
+    do {
+      pin = String(Math.floor(1000 + Math.random() * 9000));
+    } while (accesos.some(a => a.pin === pin));
+    document.getElementById("inpPin").value = pin;
+  }
+
+  function crearAcceso() {
+    const box = parseInt(document.getElementById("selBox").value, 10);
+    const mins = parseInt(document.getElementById("selDuration").value, 10);
+    const nota = document.getElementById("inpNote").value.trim();
+    const pin = document.getElementById("inpPin").value.trim();
+
+    if (!/^\d{4,6}$/.test(pin)) {
+      showToast("PIN: 4-6 dígits");
+      return;
+    }
+
+    const ahoraSec = Math.floor(Date.now() / 1000);
+    const finSec = ahoraSec + (mins * 60);
+
+    accesos = accesos.filter(a => a.pin !== pin);
+    accesos.unshift({
+      pin,
+      box,
+      inicio: ahoraSec - 60,
+      fin: finSec,
+      usado: false,
+      nota
+    });
+
+    document.getElementById("inpNote").value = "";
+    genRandomPin();
+    saveState();
+    renderPins();
+    syncListaConESP32();
+  }
+
+  function revocarPin(pin) {
+    if (!confirm(I18N[lang].confirmRevoke)) return;
+    accesos = accesos.filter(a => a.pin !== pin);
+    saveState();
+    renderPins();
+    syncListaConESP32();
+  }
+
+  function syncListaConESP32() {
+    const payloadLista = accesos.map(a => ({
+      pin: a.pin,
+      box: a.box,
+      inicio: a.inicio,
+      fin: a.fin,
+      usado: a.usado
+    }));
+    if (publishCmd({ cmd: "sync_codigos", lista: payloadLista })) {
+      showToast(I18N[lang].toastSynced);
+    }
+  }
+
+  function enviarWhatsApp(pin) {
+    const acc = accesos.find(a => a.pin === pin);
+    if (!acc) return;
+    const finDate = new Date(acc.fin * 1000);
+    const finStr = finDate.toLocaleString(lang === "ca" ? "ca-ES" : "es-ES", {
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+    });
+    const text = I18N[lang].waMsg(acc.box, acc.pin, finStr);
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  }
+
+  function cmdAbrirPrincipal() {
+    if (publishCmd({ cmd: "abrir_principal" })) showToast(I18N[lang].toastSent);
+  }
+
+  function cmdAbrirBox(box) {
+    if (publishCmd({ cmd: "abrir_box", box })) showToast(`Box ${box}: ${I18N[lang].toastSent}`);
+  }
+
+  function toggleSystemLock() {
+    sistemaBloqueado = !sistemaBloqueado;
+    saveState();
+    renderSecurity();
+    publishCmd({ cmd: "bloquear_sistema", estado: sistemaBloqueado });
+  }
+
+  function toggleBoxLock(box) {
+    boxBloqueado[box] = !boxBloqueado[box];
+    saveState();
+    renderSecurity();
+    publishCmd({ cmd: "bloquear_box", box, estado: boxBloqueado[box] });
+  }
+
+  function renderSecurity() {
+    const t = I18N[lang];
+    const sysBadge = document.getElementById("sysLockBadge");
+    const btnSys = document.getElementById("btnSysLock");
+    sysBadge.textContent = sistemaBloqueado ? t.sysLocked : t.sysActive;
+    sysBadge.className = "badge " + (sistemaBloqueado ? "badge-lock" : "badge-ok");
+    btnSys.textContent = sistemaBloqueado ? t.btnUnlockAll : t.btnLockAll;
+    btnSys.className = sistemaBloqueado ? "btn-warning" : "btn-danger";
+
+    const grid = document.getElementById("boxesGrid");
+    grid.innerHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      const locked = boxBloqueado[i];
+      const div = document.createElement("div");
+      div.className = "box-item" + (locked ? " locked" : "");
+      div.innerHTML = `
+        <div class="box-head">
+          <span>Box ${i}</span>
+          <span class="badge ${locked ? "badge-lock" : "badge-ok"}">${locked ? "LOCK" : "OK"}</span>
+        </div>
+        <button class="btn-primary btn-sm" onclick="cmdAbrirBox(${i})">🚪 ${t.openBox}</button>
+        <button class="${locked ? "btn-warning" : "btn-ghost"} btn-sm" onclick="toggleBoxLock(${i})">
+          ${locked ? "🔓 " + t.unlockBox : "🔒 " + t.lockBox}
+        </button>
+      `;
+      grid.appendChild(div);
+    }
+  }
+
+  function renderPins() {
+    const t = I18N[lang];
+    const list = document.getElementById("pinsList");
+    if (accesos.length === 0) {
+      list.innerHTML = `<div style="color:var(--muted); font-size:0.85rem; text-align:center; padding:14px 0;">${t.noPins}</div>`;
+      return;
+    }
+
+    const ahoraSec = Math.floor(Date.now() / 1000);
+    list.innerHTML = accesos.map(a => {
+      const caducado = ahoraSec > a.fin;
+      const finStr = new Date(a.fin * 1000).toLocaleString(lang === "ca" ? "ca-ES" : "es-ES", {
+        day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+      });
+      let badgeHtml = `<span class="badge badge-pend">${t.statusPending}</span>`;
+      if (caducado) badgeHtml = `<span class="badge badge-lock">${t.statusExpired}</span>`;
+      else if (a.usado) badgeHtml = `<span class="badge badge-ok">${t.statusUsed}</span>`;
+
+      return `
+        <div class="pin-card" style="${caducado ? "opacity:0.6;" : ""}">
+          <div class="pin-top">
+            <div>
+              <span class="pin-code">${a.pin}#</span>
+              <span style="font-weight:700; color:#93c5fd; margin-left:8px;">Box ${a.box}</span>
+            </div>
+            ${badgeHtml}
+          </div>
+          <div class="pin-meta">
+            ${a.nota ? `<strong>${a.nota}</strong> · ` : ""}${t.validUntil}: <strong>${finStr}</strong>
+          </div>
+          <div class="pin-actions">
+            <button class="btn-wa btn-sm" onclick="enviarWhatsApp('${a.pin}')">📲 ${t.btnWhatsApp}</button>
+            <button class="btn-ghost btn-sm" style="color:#fca5a5;" onclick="revocarPin('${a.pin}')">🗑 ${t.btnRevoke}</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderLogs() {
+    const list = document.getElementById("logList");
+    list.innerHTML = logs.map(l => `
+      <div class="log-row ${l.cls}">
+        <span>${l.texto}</span>
+        <span style="color:var(--muted); white-space:nowrap;">${l.hora}</span>
+      </div>
+    `).join("");
+  }
+
+  function clearLogs() {
+    logs = [];
+    localStorage.setItem("pwa_logs", "[]");
+    renderLogs();
+  }
+
+  function setLang(newLang) {
+    lang = newLang;
+    localStorage.setItem("pwa_lang", lang);
+    document.getElementById("btnCa").classList.toggle("active", lang === "ca");
+    document.getElementById("btnEs").classList.toggle("active", lang === "es");
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      if (I18N[lang][key]) el.textContent = I18N[lang][key];
+    });
+    if (client && client.connected) {
+      document.getElementById("connText").textContent = I18N[lang].connected;
+    }
+    renderSecurity();
+    renderPins();
+  }
+
+  function saveState() {
+    localStorage.setItem("pwa_accesos", JSON.stringify(accesos));
+    localStorage.setItem("pwa_sys_lock", JSON.stringify(sistemaBloqueado));
+    localStorage.setItem("pwa_box_lock", JSON.stringify(boxBloqueado));
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    setTimeout(() => el.classList.remove("show"), 2400);
+  }
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+
+  genRandomPin();
+  setLang(lang);
+  renderLogs();
+  initMQTT();
+</script>
+</body>
+</html>
