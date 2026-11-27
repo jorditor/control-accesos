@@ -18,42 +18,35 @@
       --text: #f8fafc;
       --muted: #94a3b8;
       --primary: #3b82f6;
-      --primary-hover: #2563eb;
       --occupied: #d97706;
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
       --whatsapp: #22c55e;
+      --exit: #38bdf8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding-bottom: 40px; }
 
     #lockScreen {
-      position: fixed; inset: 0; z-index: 100;
-      background: var(--bg);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 24px;
+      position: fixed; inset: 0; z-index: 100; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px;
     }
     .lock-box {
-      width: 100%; max-width: 340px;
-      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
-      padding: 24px; text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+      width: 100%; max-width: 340px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 24px; text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.45);
     }
     .lock-icon { font-size: 2.4rem; margin-bottom: 10px; }
     .lock-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
     .lock-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 18px; }
     .pin-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
-    .pin-dot {
-      width: 14px; height: 14px; border-radius: 50%;
-      border: 2px solid var(--primary); background: transparent; transition: 0.15s;
-    }
+    .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--primary); transition: 0.15s; }
     .pin-dot.filled { background: var(--primary); transform: scale(1.1); }
     .pin-dot.error { border-color: var(--danger); background: var(--danger); }
     .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .key-btn {
       background: var(--card-alt); color: var(--text); border: 1px solid var(--border);
-      border-radius: 12px; padding: 15px 0; font-size: 1.25rem; font-weight: 700;
-      cursor: pointer; user-select: none;
+      border-radius: 12px; padding: 15px 0; font-size: 1.25rem; font-weight: 700; cursor: pointer;
     }
     .key-btn:active { background: var(--primary); }
 
@@ -66,26 +59,21 @@
     .brand { display: flex; align-items: center; gap: 10px; }
     .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 8px var(--danger); transition: 0.3s; }
     .dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
-    h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+    h1 { font-size: 1.05rem; font-weight: 700; }
     .sub-status { font-size: 0.72rem; color: var(--muted); }
     .header-actions { display: flex; align-items: center; gap: 8px; }
     .lang-switch { display: flex; background: var(--card); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
-    .lang-btn {
-      background: transparent; color: var(--muted); border: none; padding: 6px 10px;
-      font-size: 0.78rem; font-weight: 700; cursor: pointer;
-    }
+    .lang-btn { background: transparent; color: var(--muted); border: none; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
     .lang-btn.active { background: var(--primary); color: #fff; }
+
     .container { max-width: 680px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
-    .card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-    }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
     .card-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     button {
       border: none; border-radius: 10px; padding: 12px 14px; font-size: 0.9rem; font-weight: 600;
-      cursor: pointer; transition: transform 0.08s, opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer; transition: transform 0.08s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     }
     button:active { transform: scale(0.97); }
     .btn-primary { background: var(--primary); color: #fff; }
@@ -103,34 +91,73 @@
       width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border);
       border-radius: 10px; padding: 11px 12px; font-size: 0.95rem; outline: none;
     }
-    select:focus, input:focus { border-color: var(--primary); }
 
+    /* Selector de dies de la setmana */
+    .days-picker { display: none; margin-bottom: 12px; }
+    .days-picker.show { display: block; }
+    .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 4px; }
+    .day-btn {
+      padding: 9px 2px; font-size: 0.78rem; font-weight: 700; border-radius: 8px;
+      background: var(--bg); color: var(--muted); border: 1px solid var(--border);
+    }
+    .day-btn.active { background: var(--primary); color: #fff; border-color: #60a5fa; }
+
+    /* Targetes de Box / Gimnàs */
     .box-item {
       background: var(--card-alt); border: 1px solid var(--border); border-radius: 10px;
-      padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: 0.25s;
+      padding: 10px; display: flex; flex-direction: column; gap: 6px; transition: 0.25s;
     }
     .box-item.occupied { border-color: var(--warning); background: rgba(245, 158, 11, 0.12); }
+    .box-item.inside { border-color: var(--success); background: rgba(16, 185, 129, 0.14); }
     .box-item.locked { border-color: var(--danger); background: rgba(239, 68, 68, 0.12); }
-    .box-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.88rem; }
+    .box-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.86rem; }
+    .presence-pill {
+      font-size: 0.72rem; font-weight: 700; padding: 3px 6px; border-radius: 6px;
+      background: rgba(15, 23, 42, 0.65); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .presence-pill.in { color: #6ee7b7; background: rgba(16, 185, 129, 0.22); }
+
     .badge { font-size: 0.68rem; padding: 2px 6px; border-radius: 999px; font-weight: 700; }
     .badge-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
     .badge-lock { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
     .badge-pend { background: rgba(245, 158, 11, 0.22); color: #fcd34d; }
+    .badge-week { background: rgba(59, 130, 246, 0.25); color: #93c5fd; }
+    .badge-exit { background: rgba(56, 189, 248, 0.22); color: #7dd3fc; }
 
     .pin-card {
       background: var(--card-alt); border: 1px solid var(--border); border-radius: 12px;
       padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;
     }
-    .pin-top { display: flex; justify-content: space-between; align-items: center; }
-    .pin-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; color: #fff; }
+    .pin-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .pin-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 0.06em; color: #fff; }
     .pin-meta { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
     .pin-actions { display: flex; gap: 8px; margin-top: 2px; }
     .pin-actions button { flex: 1; }
 
-    .log-list { max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    /* Pestanyes del registre */
+    .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+    .tab-btn {
+      flex: 1; padding: 8px; font-size: 0.8rem; border-radius: 8px;
+      background: var(--bg); color: var(--muted); border: 1px solid var(--border);
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .log-list { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .io-row {
+      background: var(--bg); padding: 9px 11px; border-radius: 9px;
+      border-left: 4px solid var(--success); display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    }
+    .io-row.out { border-left-color: var(--exit); }
+    .io-main { display: flex; flex-direction: column; gap: 2px; }
+    .io-title { font-size: 0.85rem; font-weight: 700; color: #fff; }
+    .io-sub { font-size: 0.74rem; color: var(--muted); }
+    .io-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+    .io-time { font-size: 0.76rem; color: var(--muted); font-weight: 600; }
+
     .log-row { font-size: 0.78rem; background: var(--bg); padding: 8px 10px; border-radius: 8px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; gap: 8px; }
     .log-row.err { border-left-color: var(--danger); }
     .log-row.ok { border-left-color: var(--success); }
+
     .toast {
       position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
       background: #020617; color: #fff; border: 1px solid var(--border);
@@ -148,10 +175,7 @@
     <div class="lock-title" data-i18n="lockTitle">Accés Administrador</div>
     <div class="lock-sub" data-i18n="lockSub">Introdueix el PIN de gestió</div>
     <div class="pin-dots" id="pinDots">
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
     <div class="keypad">
       <button class="key-btn" onclick="pressPin('1')">1</button>
@@ -199,7 +223,7 @@
       </div>
       <div>
         <label data-i18n="duration">Durada de l'accés</label>
-        <select id="selDuration">
+        <select id="selDuration" onchange="onDurationChange()">
           <option value="60" data-i18n="dur1h">1 hora</option>
           <option value="120" data-i18n="dur2h">2 hores</option>
           <option value="240" data-i18n="dur4h">4 hores</option>
@@ -207,10 +231,18 @@
           <option value="1440" selected data-i18n="dur24h">24 hores (1 dia)</option>
           <option value="4320" data-i18n="dur3d">3 dies</option>
           <option value="10080" data-i18n="dur7d">7 dies</option>
+          <option value="weekly" data-i18n="durWeekly">📅 Dies de la setmana (recurrent)</option>
           <option value="5256000" data-i18n="durPerm">Permanent (Clauer / Fix)</option>
         </select>
       </div>
     </div>
+
+    <!-- Selector de dies de la setmana (visible només si durada = weekly) -->
+    <div id="daysPicker" class="days-picker">
+      <label data-i18n="pickDaysLabel">Selecciona els dies autoritzats (24 h cada dia):</label>
+      <div class="days-grid" id="daysGrid"></div>
+    </div>
+
     <div class="form-row">
       <div>
         <label data-i18n="clientLabel">Nom client / clauer (opcional)</label>
@@ -229,10 +261,10 @@
     </button>
   </section>
 
-  <!-- 2. OBERTURA MANUAL I BLOQUEIG GLOBAL -->
+  <!-- 2. OBERTURA MANUAL, PRESÈNCIA EN VIU I BLOQUEJOS -->
   <section class="card">
     <div class="card-title">
-      <span data-i18n="remoteControl">Obertura remota i bloquejos</span>
+      <span data-i18n="remoteControl">Obertura remota i presència</span>
       <span id="sysLockBadge" class="badge badge-ok" data-i18n="sysActive">SISTEMA ACTIU</span>
     </div>
     <div class="grid-2" style="margin-bottom:12px;">
@@ -246,7 +278,21 @@
     <div class="grid-3" id="boxesGrid"></div>
   </section>
 
-  <!-- 3. CODIS I CLAUERS ACTIUS -->
+  <!-- 3. REGISTRE VISUAL D'ENTRADES I SORTIDES + REGISTRE TÈCNIC -->
+  <section class="card">
+    <div class="card-title">
+      <span data-i18n="liveEvents">Control d'entrades i sortides</span>
+      <button class="btn-ghost btn-sm" onclick="clearLogs()" data-i18n="btnClear">Netejar</button>
+    </div>
+    <div class="tabs">
+      <button id="tabIO" class="tab-btn active" onclick="setLogTab('io')" data-i18n="tabIO">🟢 Entrades / Sortides</button>
+      <button id="tabTech" class="tab-btn" onclick="setLogTab('tech')" data-i18n="tabTech">⚙️ Registre tècnic</button>
+    </div>
+    <div id="ioList" class="log-list"></div>
+    <div id="logList" class="log-list" style="display:none;"></div>
+  </section>
+
+  <!-- 4. CODIS I CLAUERS ACTIUS -->
   <section class="card">
     <div class="card-title">
       <span data-i18n="activePinsTitle">Codis i clauers actius</span>
@@ -256,15 +302,6 @@
       </div>
     </div>
     <div id="pinsList"></div>
-  </section>
-
-  <!-- 4. REGISTRE D'ESDEVENIMENTS EN VIU -->
-  <section class="card">
-    <div class="card-title">
-      <span data-i18n="liveEvents">Registre d'activitat en viu</span>
-      <button class="btn-ghost btn-sm" onclick="clearLogs()" data-i18n="btnClear">Netejar</button>
-    </div>
-    <div id="logList" class="log-list"></div>
   </section>
 
 </div>
@@ -280,112 +317,101 @@
   const TOPIC_EVENTS = "local/acceso/eventos";
   const TOPIC_STATE  = "local/acceso/estado";
 
+  // Ordre visual: DL(1), DT(2), DC(3), DJ(4), DV(5), DS(6), DG(0)
+  const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+  const DAY_LABELS = {
+    ca: { 1:"DL", 2:"DT", 3:"DC", 4:"DJ", 5:"DV", 6:"DS", 0:"DG" },
+    es: { 1:"LU", 2:"MA", 3:"MI", 4:"JU", 5:"VI", 6:"SÁ", 0:"DO" }
+  };
+  const DAY_FULL = {
+    ca: { 1:"dilluns", 2:"dimarts", 3:"dimecres", 4:"dijous", 5:"divendres", 6:"dissabte", 0:"diumenge" },
+    es: { 1:"lunes", 2:"martes", 3:"miércoles", 4:"jueves", 5:"viernes", 6:"sábado", 0:"domingo" }
+  };
+
   const I18N = {
     ca: {
-      lockTitle: "Accés Administrador",
-      lockSub: "Introdueix el PIN de gestió",
-      appTitle: "Control d'Accessos",
-      connecting: "Connectant a EMQX...",
-      connected: "Connectat a EMQX Cloud",
-      disconnected: "Desconnectat - Reconnectant...",
-      newAccessTitle: "Nou accés o clauer",
-      selectBox: "Destí d'accés",
-      duration: "Durada de l'accés",
+      lockTitle: "Accés Administrador", lockSub: "Introdueix el PIN de gestió",
+      appTitle: "Control d'Accessos", connecting: "Connectant a EMQX...",
+      connected: "Connectat a EMQX Cloud", disconnected: "Desconnectat - Reconnectant...",
+      newAccessTitle: "Nou accés o clauer", selectBox: "Destí d'accés", duration: "Durada de l'accés",
       dur1h: "1 hora", dur2h: "2 hores", dur4h: "4 hores", dur8h: "8 hores",
       dur24h: "24 hores (1 dia)", dur3d: "3 dies", dur7d: "7 dies",
-      durPerm: "Permanent (Clauer / Fix)",
-      clientLabel: "Nom client / clauer (opcional)",
-      pinLabel: "Codi PIN o ID Clauer",
+      durWeekly: "📅 Dies de la setmana (recurrent)", durPerm: "Permanent (Clauer / Fix)",
+      pickDaysLabel: "Selecciona els dies autoritzats (24 h cada dia):",
+      errNoDays: "Selecciona almenys un dia de la setmana",
+      clientLabel: "Nom client / clauer (opcional)", pinLabel: "Codi PIN o ID Clauer",
       btnCreateSync: "Guardar i enviar al controlador",
-      remoteControl: "Obertura remota i bloquejos",
-      sysActive: "SISTEMA ACTIU",
-      sysLocked: "SISTEMA BLOQUEJAT",
-      btnOpenMain: "🚪 Obrir Porta Principal",
-      btnLockAll: "🔒 Bloquejar TOT",
-      btnUnlockAll: "🔓 Desbloquejar TOT",
-      openBox: "Obrir",
-      lockBox: "Bloquejar",
-      unlockBox: "Activar",
-      boxFree: "LLIURE",
-      boxBusy: "OCUPAT",
-      selFree: "🟢 Lliure",
-      selBusy: "🟠 Ocupat",
-      gymName: "🏋️ Gimnàs",
-      selMainOnly: "🚪 Només Porta Principal (Clauer)",
-      mainDoorTag: "🚪 Porta Principal",
-      keyfobBadge: "Clauer / Fix",
-      confirmBusyBox: (destLabel) => `${destLabel} ja té un codi actiu en aquest moment. Vols crear-ne un altre igualment?`,
-      activePinsTitle: "Codis i clauers actius",
-      btnForceSync: "↻ Reenviar",
-      liveEvents: "Registre d'activitat en viu",
-      btnClear: "Netejar",
+      remoteControl: "Obertura remota i presència",
+      sysActive: "SISTEMA ACTIU", sysLocked: "SISTEMA BLOQUEJAT",
+      btnOpenMain: "🚪 Obrir Porta Principal", btnLockAll: "🔒 Bloquejar TOT", btnUnlockAll: "🔓 Desbloquejar TOT",
+      openBox: "Obrir", lockBox: "Bloquejar", unlockBox: "Activar",
+      boxFree: "LLIURE", boxBusy: "OCUPAT", boxInside: "DINS",
+      selFree: "🟢 Lliure", selBusy: "🟠 Ocupat", gymName: "🏋️ Gimnàs",
+      selMainOnly: "🚪 Només Porta Principal (Clauer)", mainDoorTag: "🚪 Porta Principal",
+      keyfobBadge: "Clauer / Fix", weeklyBadge: "Setmanal",
+      outsideLabel: "⚪ Fora", insideLabel: "🟢 DINS",
+      confirmBusyBox: (d) => `${d} ja té un codi actiu. Vols crear-ne un altre igualment?`,
+      activePinsTitle: "Codis i clauers actius", btnForceSync: "↻ Reenviar",
+      liveEvents: "Control d'entrades i sortides", btnClear: "Netejar",
+      tabIO: "🟢 Entrades / Sortides", tabTech: "⚙️ Registre tècnic",
+      noIO: "Encara no hi ha moviments d'entrada o sortida.",
+      entryWord: "ENTRADA", exitWord: "SORTIDA", stayWord: "Estada",
       noPins: "Cap codi ni clauer actiu. Crea'n un a dalt per començar.",
-      statusPending: "Pendent 1r ús",
-      statusUsed: "En ús (reentrada activa)",
-      statusExpired: "Caducat",
+      statusPending: "Pendent 1r ús", statusUsed: "En ús", statusExpired: "Caducat",
       validUntil: "Vàlid fins",
       startsOnFirstUse: (durStr) => `Durada: ${durStr} (compta des del 1r accés)`,
+      weeklyText: (daysStr) => `Cada setmana: ${daysStr}`,
       permanentText: "Accés permanent",
-      btnWhatsApp: "Enviar WhatsApp",
-      btnRevoke: "Revocar",
+      btnWhatsApp: "Enviar WhatsApp", btnRevoke: "Revocar",
       toastSent: "Ordre enviada al controlador",
       toastSynced: "Sincronitzat amb controlador i tots els mòbils",
       confirmRevoke: "Vols eliminar aquest accés immediatament?",
       waMsg: (destName, pin, durStr) =>
-        `Hola! Aquí tens el teu codi d'accés per a *${destName}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de la tecla # al teclat exterior)_\n\n🚪 Aquest codi obre la *Porta Principal* i *${destName}*.\n⏳ Durada contractada: *${durStr}* (el temps comença a comptar en el moment que teclegis el codi per primera vegada).`
+        `Hola! Aquí tens el teu codi d'accés per a *${destName}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de # tant per ENTRAR com per SORTIR)_\n\n🚪 Aquest codi obre la *Porta Principal* i *${destName}*.\n⏳ Durada: *${durStr}* (comença a comptar en el 1r accés).`,
+      waMsgWeekly: (destName, pin, daysStr) =>
+        `Hola! Aquí tens el teu codi d'accés setmanal per a *${destName}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de # tant per ENTRAR com per SORTIR)_\n\n🚪 Obre la *Porta Principal* i *${destName}*.\n📅 Dies autoritzats: *${daysStr}* (tot el dia).`
     },
     es: {
-      lockTitle: "Acceso Administrador",
-      lockSub: "Introduce el PIN de gestión",
-      appTitle: "Control de Accesos",
-      connecting: "Conectando a EMQX...",
-      connected: "Conectado a EMQX Cloud",
-      disconnected: "Desconectado - Reconectando...",
-      newAccessTitle: "Nuevo acceso o llavero",
-      selectBox: "Destino de acceso",
-      duration: "Duración del acceso",
+      lockTitle: "Acceso Administrador", lockSub: "Introduce el PIN de gestión",
+      appTitle: "Control de Accesos", connecting: "Conectando a EMQX...",
+      connected: "Conectado a EMQX Cloud", disconnected: "Desconectado - Reconectando...",
+      newAccessTitle: "Nuevo acceso o llavero", selectBox: "Destino de acceso", duration: "Duración del acceso",
       dur1h: "1 hora", dur2h: "2 horas", dur4h: "4 horas", dur8h: "8 horas",
       dur24h: "24 horas (1 día)", dur3d: "3 días", dur7d: "7 días",
-      durPerm: "Permanente (Llavero / Fijo)",
-      clientLabel: "Nombre cliente / llavero (opcional)",
-      pinLabel: "Código PIN o ID Llavero",
+      durWeekly: "📅 Días de la semana (recurrente)", durPerm: "Permanente (Llavero / Fijo)",
+      pickDaysLabel: "Selecciona los días autorizados (24 h cada día):",
+      errNoDays: "Selecciona al menos un día de la semana",
+      clientLabel: "Nombre cliente / llavero (opcional)", pinLabel: "Código PIN o ID Llavero",
       btnCreateSync: "Guardar y enviar al controlador",
-      remoteControl: "Apertura remota y bloqueos",
-      sysActive: "SISTEMA ACTIVO",
-      sysLocked: "SISTEMA BLOQUEADO",
-      btnOpenMain: "🚪 Abrir Puerta Principal",
-      btnLockAll: "🔒 Bloquear TODO",
-      btnUnlockAll: "🔓 Desbloquear TODO",
-      openBox: "Abrir",
-      lockBox: "Bloquear",
-      unlockBox: "Activar",
-      boxFree: "LIBRE",
-      boxBusy: "OCUPADO",
-      selFree: "🟢 Libre",
-      selBusy: "🟠 Ocupado",
-      gymName: "🏋️ Gimnasio",
-      selMainOnly: "🚪 Solo Puerta Principal (Llavero)",
-      mainDoorTag: "🚪 Puerta Principal",
-      keyfobBadge: "Llavero / Fijo",
-      confirmBusyBox: (destLabel) => `${destLabel} ya tiene un código activo en este momento. ¿Quieres crear otro igualmente?`,
-      activePinsTitle: "Códigos y llaveros activos",
-      btnForceSync: "↻ Reenviar",
-      liveEvents: "Registro de actividad en vivo",
-      btnClear: "Limpiar",
+      remoteControl: "Apertura remota y presencia",
+      sysActive: "SISTEMA ACTIVO", sysLocked: "SISTEMA BLOQUEADO",
+      btnOpenMain: "🚪 Abrir Puerta Principal", btnLockAll: "🔒 Bloquear TODO", btnUnlockAll: "🔓 Desbloquear TODO",
+      openBox: "Abrir", lockBox: "Bloquear", unlockBox: "Activar",
+      boxFree: "LIBRE", boxBusy: "OCUPADO", boxInside: "DENTRO",
+      selFree: "🟢 Libre", selBusy: "🟠 Ocupado", gymName: "🏋️ Gimnasio",
+      selMainOnly: "🚪 Solo Puerta Principal (Llavero)", mainDoorTag: "🚪 Puerta Principal",
+      keyfobBadge: "Llavero / Fijo", weeklyBadge: "Semanal",
+      outsideLabel: "⚪ Fuera", insideLabel: "🟢 DENTRO",
+      confirmBusyBox: (d) => `${d} ya tiene un código activo. ¿Quieres crear otro igualmente?`,
+      activePinsTitle: "Códigos y llaveros activos", btnForceSync: "↻ Reenviar",
+      liveEvents: "Control de entradas y salidas", btnClear: "Limpiar",
+      tabIO: "🟢 Entradas / Salidas", tabTech: "⚙️ Registro técnico",
+      noIO: "Todavía no hay movimientos de entrada o salida.",
+      entryWord: "ENTRADA", exitWord: "SALIDA", stayWord: "Estancia",
       noPins: "Ningún código ni llavero activo. Crea uno arriba para empezar.",
-      statusPending: "Pendiente 1er uso",
-      statusUsed: "En uso (reentrada activa)",
-      statusExpired: "Caducado",
+      statusPending: "Pendiente 1er uso", statusUsed: "En uso", statusExpired: "Caducado",
       validUntil: "Válido hasta",
       startsOnFirstUse: (durStr) => `Duración: ${durStr} (cuenta desde el 1er acceso)`,
+      weeklyText: (daysStr) => `Cada semana: ${daysStr}`,
       permanentText: "Acceso permanente",
-      btnWhatsApp: "Enviar WhatsApp",
-      btnRevoke: "Revocar",
+      btnWhatsApp: "Enviar WhatsApp", btnRevoke: "Revocar",
       toastSent: "Orden enviada al controlador",
       toastSynced: "Sincronizado con controlador y todos los móviles",
       confirmRevoke: "¿Quieres eliminar este acceso inmediatamente?",
       waMsg: (destName, pin, durStr) =>
-        `¡Hola! Aquí tienes tu código de acceso para *${destName}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de la tecla # en el teclado exterior)_\n\n🚪 Este código abre la *Puerta Principal* y *${destName}*.\n⏳ Duración contratada: *${durStr}* (el tiempo empieza a contar en el momento en que teclees el código por primera vez).`
+        `¡Hola! Aquí tienes tu código de acceso para *${destName}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de # tanto para ENTRAR como para SALIR)_\n\n🚪 Este código abre la *Puerta Principal* y *${destName}*.\n⏳ Duración: *${durStr}* (empieza a contar en el 1er acceso).`,
+      waMsgWeekly: (destName, pin, daysStr) =>
+        `¡Hola! Aquí tienes tu código de acceso semanal para *${destName}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de # tanto para ENTRAR como para SALIR)_\n\n🚪 Abre la *Puerta Principal* y *${destName}*.\n📅 Días autorizados: *${daysStr}* (todo el día).`
     }
   };
 
@@ -395,7 +421,10 @@
   let boxBloqueado = JSON.parse(localStorage.getItem("pwa_box_lock") || "[false,false,false,false,false,false,false]");
   if (boxBloqueado.length < 7) while (boxBloqueado.length < 7) boxBloqueado.push(false);
   let logs = JSON.parse(localStorage.getItem("pwa_logs") || "[]");
+  let ioLogs = JSON.parse(localStorage.getItem("pwa_io_logs") || "[]");
   let stateUpdatedAt = Number(localStorage.getItem("pwa_state_ts") || "0");
+  let selectedDaysMask = 0;
+  let currentLogTab = "io";
   let client = null;
   let adminBuffer = "";
 
@@ -405,18 +434,49 @@
     return `Box ${boxNum}`;
   }
 
+  function formatearDiasMask(mask, full = false) {
+    const dict = full ? DAY_FULL[lang] : DAY_LABELS[lang];
+    return DAY_ORDER.filter(d => (mask & (1 << d)) !== 0).map(d => dict[d]).join(", ");
+  }
+
   function formatearDuracion(seg) {
     const mins = Math.round(seg / 60);
     if (mins < 60) return `${mins} min`;
-    const horas = Math.round(mins / 60);
-    if (horas < 24) return horas === 1 ? "1 hora" : (lang === "ca" ? `${horas} hores` : `${horas} horas`);
+    const horas = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    if (horas < 24) return remMins > 0 ? `${horas}h ${remMins}m` : (horas === 1 ? "1 hora" : (lang === "ca" ? `${horas} hores` : `${horas} horas`));
     const dias = Math.round(horas / 24);
     return dias === 1 ? (lang === "ca" ? "1 dia" : "1 día") : (lang === "ca" ? `${dias} dies` : `${dias} días`);
   }
 
+  function onDurationChange() {
+    const isWeekly = document.getElementById("selDuration").value === "weekly";
+    document.getElementById("daysPicker").classList.toggle("show", isWeekly);
+  }
+
+  function toggleDayBit(dayBit) {
+    selectedDaysMask ^= (1 << dayBit);
+    renderDaysPicker();
+  }
+
+  function renderDaysPicker() {
+    const grid = document.getElementById("daysGrid");
+    grid.innerHTML = DAY_ORDER.map(d => {
+      const act = (selectedDaysMask & (1 << d)) !== 0;
+      return `<button type="button" class="day-btn ${act ? "active" : ""}" onclick="toggleDayBit(${d})">${DAY_LABELS[lang][d]}</button>`;
+    }).join("");
+  }
+
+  function setLogTab(tab) {
+    currentLogTab = tab;
+    document.getElementById("tabIO").classList.toggle("active", tab === "io");
+    document.getElementById("tabTech").classList.toggle("active", tab === "tech");
+    document.getElementById("ioList").style.display = tab === "io" ? "flex" : "none";
+    document.getElementById("logList").style.display = tab === "tech" ? "flex" : "none";
+  }
+
   function updatePinDots(isError = false) {
-    const dots = document.querySelectorAll("#pinDots .pin-dot");
-    dots.forEach((d, idx) => {
+    document.querySelectorAll("#pinDots .pin-dot").forEach((d, idx) => {
       d.classList.remove("filled", "error");
       if (isError) d.classList.add("error");
       else if (idx < adminBuffer.length) d.classList.add("filled");
@@ -435,10 +495,7 @@
         updatePinDots(false);
       } else {
         updatePinDots(true);
-        setTimeout(() => {
-          adminBuffer = "";
-          updatePinDots(false);
-        }, 450);
+        setTimeout(() => { adminBuffer = ""; updatePinDots(false); }, 450);
       }
     }
   }
@@ -461,10 +518,7 @@
     stateUpdatedAt = Date.now();
     localStorage.setItem("pwa_state_ts", String(stateUpdatedAt));
     client.publish(TOPIC_STATE, JSON.stringify({
-      updatedAt: stateUpdatedAt,
-      accesos,
-      sistemaBloqueado,
-      boxBloqueado
+      updatedAt: stateUpdatedAt, accesos, sistemaBloqueado, boxBloqueado, ioLogs: ioLogs.slice(0, 30)
     }), { qos: 1, retain: true });
   }
 
@@ -480,20 +534,21 @@
       boxBloqueado = snapshot.boxBloqueado;
       while (boxBloqueado.length < 7) boxBloqueado.push(false);
     }
+    if (Array.isArray(snapshot.ioLogs) && snapshot.ioLogs.length > 0) {
+      ioLogs = snapshot.ioLogs;
+      localStorage.setItem("pwa_io_logs", JSON.stringify(ioLogs));
+    }
 
     localStorage.setItem("pwa_state_ts", String(stateUpdatedAt));
     saveState();
     renderPins();
+    renderIOLogs();
   }
 
   function initMQTT() {
     const clientId = "PWA_Admin_" + Math.random().toString(16).substring(2, 8);
     client = mqtt.connect(BROKER_URL, {
-      clientId,
-      username: MQTT_USER,
-      password: MQTT_PASS,
-      reconnectPeriod: 3000,
-      clean: true
+      clientId, username: MQTT_USER, password: MQTT_PASS, reconnectPeriod: 3000, clean: true
     });
 
     client.on("connect", () => {
@@ -518,32 +573,64 @@
   }
 
   function publishCmd(obj) {
-    if (!client || !client.connected) {
-      showToast("MQTT offline");
-      return false;
-    }
+    if (!client || !client.connected) { showToast("MQTT offline"); return false; }
     client.publish(TOPIC_CMD, JSON.stringify(obj), { qos: 1 });
     return true;
   }
 
   function procesarEventoESP32(ev) {
-    if (ev.tipo === "primer_acceso" && ev.detalle) {
-      let changed = false;
-      const ahoraSec = Math.floor(Date.now() / 1000);
-      accesos.forEach(a => {
-        if (a.pin === ev.detalle && !a.usado) {
-          a.usado = true;
-          a.inicio = ahoraSec;
-          const durSeg = a.duracion || 86400;
-          a.fin = ev.fin ? Number(ev.fin) : (ahoraSec + durSeg);
-          changed = true;
+    const ahoraSec = Math.floor(Date.now() / 1000);
+    const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const horaFull = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const fechaCorta = new Date().toLocaleDateString(lang === "ca" ? "ca-ES" : "es-ES", { day: "2-digit", month: "2-digit" });
+
+    if ((ev.tipo === "entrada" || ev.tipo === "salida") && ev.detalle) {
+      let acc = accesos.find(a => a.pin === ev.detalle);
+      let nombre = acc && acc.nota ? acc.nota : `PIN ${ev.detalle}`;
+      let estanciaTxt = "";
+
+      if (acc) {
+        if (ev.tipo === "entrada") {
+          acc.dentro = true;
+          acc.horaEntrada = hora;
+          acc.tsEntrada = ahoraSec;
+          if (ev.primerUso && !acc.usado) {
+            acc.usado = true;
+            if (!acc.diasMask) {
+              acc.inicio = ahoraSec;
+              acc.fin = ev.fin ? Number(ev.fin) : (ahoraSec + (acc.duracion || 86400));
+            }
+          }
+        } else {
+          if (acc.tsEntrada && ahoraSec > acc.tsEntrada) {
+            estanciaTxt = formatearDuracion(ahoraSec - acc.tsEntrada);
+          }
+          acc.dentro = false;
+          acc.horaEntrada = "";
+          acc.tsEntrada = 0;
         }
-      });
-      if (changed) {
         saveState();
         renderPins();
-        publicarEstadoNube();
       }
+
+      ioLogs.unshift({
+        tipo: ev.tipo,
+        nombre,
+        pin: ev.detalle,
+        box: ev.box || 0,
+        hora: `${fechaCorta} ${hora}`,
+        estancia: estanciaTxt
+      });
+      if (ioLogs.length > 40) ioLogs.pop();
+      localStorage.setItem("pwa_io_logs", JSON.stringify(ioLogs));
+      renderIOLogs();
+      publicarEstadoNube();
+    }
+
+    if (ev.tipo === "reset_medianoche") {
+      accesos.forEach(a => { a.dentro = false; a.horaEntrada = ""; a.tsEntrada = 0; });
+      saveState();
+      renderPins();
     }
     if (ev.tipo === "estado_bloqueo_sistema") {
       sistemaBloqueado = (ev.detalle === "BLOQUEADO");
@@ -556,12 +643,11 @@
       renderSecurity();
     }
 
-    const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     const isErr = ev.tipo.startsWith("denegado");
-    const isOk = ev.tipo.includes("acceso") || ev.tipo.includes("abre") || ev.tipo === "online";
+    const isOk = ev.tipo === "entrada" || ev.tipo === "salida" || ev.tipo.includes("abre") || ev.tipo === "online";
     const destLog = ev.box ? `(${ev.box === 6 ? "Gimnàs" : "Box " + ev.box})` : "";
     logs.unshift({
-      hora,
+      hora: horaFull,
       texto: `${ev.tipo} ${destLog} — ${ev.detalle || ""}`,
       cls: isErr ? "err" : (isOk ? "ok" : "")
     });
@@ -572,27 +658,34 @@
 
   function genRandomPin() {
     let pin;
-    do {
-      pin = String(Math.floor(1000 + Math.random() * 9000));
-    } while (accesos.some(a => a.pin === pin));
+    do { pin = String(Math.floor(1000 + Math.random() * 9000)); }
+    while (accesos.some(a => a.pin === pin));
     document.getElementById("inpPin").value = pin;
   }
 
   function isBoxOcupado(boxNum) {
     if (boxNum < 1 || boxNum > 6) return false;
     const ahoraSec = Math.floor(Date.now() / 1000);
-    return accesos.some(a => a.box === boxNum && ahoraSec <= a.fin);
+    const hoyBit = 1 << (new Date().getDay());
+    return accesos.some(a => a.box === boxNum && (a.diasMask ? ((a.diasMask & hoyBit) !== 0) : (ahoraSec <= a.fin)));
   }
 
   function crearAcceso() {
     const box = parseInt(document.getElementById("selBox").value, 10);
-    const mins = parseInt(document.getElementById("selDuration").value, 10);
+    const durVal = document.getElementById("selDuration").value;
     const nota = document.getElementById("inpNote").value.trim();
     const pin = document.getElementById("inpPin").value.trim();
 
-    if (!/^\d{4,10}$/.test(pin)) {
-      showToast("PIN / Clauer: 4-10 dígits");
-      return;
+    if (!/^\d{4,10}$/.test(pin)) { showToast("PIN / Clauer: 4-10 dígits"); return; }
+
+    let diasMask = 0;
+    let mins = 1440;
+    if (durVal === "weekly") {
+      if (selectedDaysMask === 0) { showToast(I18N[lang].errNoDays); return; }
+      diasMask = selectedDaysMask;
+      mins = 5256000;
+    } else {
+      mins = parseInt(durVal, 10);
     }
 
     if (box >= 1 && isBoxOcupado(box)) {
@@ -601,17 +694,12 @@
 
     const ahoraSec = Math.floor(Date.now() / 1000);
     const duracionSec = mins * 60;
-    const finInicialSec = (box >= 1) ? (ahoraSec + (7 * 86400)) : (ahoraSec + duracionSec);
+    const finInicialSec = (diasMask > 0) ? (ahoraSec + 315360000) : ((box >= 1) ? (ahoraSec + 7 * 86400) : (ahoraSec + duracionSec));
 
     accesos = accesos.filter(a => a.pin !== pin);
     accesos.unshift({
-      pin,
-      box,
-      inicio: ahoraSec - 60,
-      fin: finInicialSec,
-      duracion: duracionSec,
-      usado: false,
-      nota
+      pin, box, inicio: ahoraSec - 60, fin: finInicialSec, duracion: duracionSec,
+      usado: false, diasMask, dentro: false, horaEntrada: "", tsEntrada: 0, nota
     });
 
     document.getElementById("inpNote").value = "";
@@ -631,59 +719,48 @@
 
   function syncListaConESP32() {
     const payloadLista = accesos.map(a => ({
-      pin: a.pin,
-      box: a.box,
-      inicio: a.inicio,
-      fin: a.fin,
-      duracion: a.duracion || (a.fin - a.inicio),
-      usado: a.usado
+      pin: a.pin, box: a.box, inicio: a.inicio, fin: a.fin,
+      duracion: a.duracion || (a.fin - a.inicio), usado: a.usado,
+      diasMask: a.diasMask || 0, dentro: Boolean(a.dentro), ultMov: a.tsEntrada || 0
     }));
     publicarEstadoNube();
-    if (publishCmd({ cmd: "sync_codigos", lista: payloadLista })) {
-      showToast(I18N[lang].toastSynced);
-    }
+    if (publishCmd({ cmd: "sync_codigos", lista: payloadLista })) showToast(I18N[lang].toastSynced);
   }
 
   function activarPortalWiFi() {
     if (!confirm(lang === "ca"
       ? "Vols activar el punt d'accés Wi-Fi del controlador (Accessos-Local-Config) durant 10 minuts?"
       : "¿Quieres activar el punto de acceso Wi-Fi del controlador (Accessos-Local-Config) durante 10 minutos?")) return;
-    if (publishCmd({ cmd: "activar_portal_wifi" })) {
-      showToast("Wi-Fi AP: Accessos-Local-Config (192.168.4.1)");
-    }
+    if (publishCmd({ cmd: "activar_portal_wifi" })) showToast("Wi-Fi AP: Accessos-Local-Config (192.168.4.1)");
   }
 
   function enviarWhatsApp(pin) {
     const acc = accesos.find(a => a.pin === pin);
     if (!acc || acc.box === 0) return;
-    const durSeg = acc.duracion || (acc.fin - acc.inicio);
-    const durStr = formatearDuracion(durSeg);
     const destClean = acc.box === 6 ? (lang === "ca" ? "el Gimnàs" : "el Gimnasio") : `el Box ${acc.box}`;
-    const text = I18N[lang].waMsg(destClean, acc.pin, durStr);
+    let text = "";
+    if (acc.diasMask > 0) {
+      text = I18N[lang].waMsgWeekly(destClean, acc.pin, formatearDiasMask(acc.diasMask, true));
+    } else {
+      text = I18N[lang].waMsg(destClean, acc.pin, formatearDuracion(acc.duracion || (acc.fin - acc.inicio)));
+    }
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
   function cmdAbrirPrincipal() {
     if (publishCmd({ cmd: "abrir_principal" })) showToast(I18N[lang].toastSent);
   }
-
   function cmdAbrirBox(box) {
     if (publishCmd({ cmd: "abrir_box", box })) showToast(`${getDestinoNombre(box)}: ${I18N[lang].toastSent}`);
   }
-
   function toggleSystemLock() {
     sistemaBloqueado = !sistemaBloqueado;
-    saveState();
-    renderSecurity();
-    publicarEstadoNube();
+    saveState(); renderSecurity(); publicarEstadoNube();
     publishCmd({ cmd: "bloquear_sistema", estado: sistemaBloqueado });
   }
-
   function toggleBoxLock(box) {
     boxBloqueado[box] = !boxBloqueado[box];
-    saveState();
-    renderSecurity();
-    publicarEstadoNube();
+    saveState(); renderSecurity(); publicarEstadoNube();
     publishCmd({ cmd: "bloquear_box", box, estado: boxBloqueado[box] });
   }
 
@@ -693,9 +770,7 @@
     const valActual = sel.value !== "" ? sel.value : "1";
     let html = "";
     for (let i = 1; i <= 6; i++) {
-      const ocupado = isBoxOcupado(i);
-      const estadoTxt = ocupado ? t.selBusy : t.selFree;
-      html += `<option value="${i}">${getDestinoNombre(i)} (${estadoTxt})</option>`;
+      html += `<option value="${i}">${getDestinoNombre(i)} (${isBoxOcupado(i) ? t.selBusy : t.selFree})</option>`;
     }
     html += `<option value="0">${t.selMainOnly}</option>`;
     sel.innerHTML = html;
@@ -716,19 +791,26 @@
     for (let i = 1; i <= 6; i++) {
       const locked = boxBloqueado[i];
       const ocupado = isBoxOcupado(i);
-      const div = document.createElement("div");
-      div.className = "box-item" + (locked ? " locked" : (ocupado ? " occupied" : ""));
+      const usuarioDentro = accesos.find(a => a.box === i && a.dentro);
 
-      const badgeClass = locked ? "badge-lock" : (ocupado ? "badge-pend" : "badge-ok");
-      const badgeText = locked ? "LOCK" : (ocupado ? t.boxBusy : t.boxFree);
+      const div = document.createElement("div");
+      div.className = "box-item" + (locked ? " locked" : (usuarioDentro ? " inside" : (ocupado ? " occupied" : "")));
+
+      const badgeClass = locked ? "badge-lock" : (usuarioDentro ? "badge-ok" : (ocupado ? "badge-pend" : "badge-ok"));
+      const badgeText = locked ? "LOCK" : (usuarioDentro ? t.boxInside : (ocupado ? t.boxBusy : t.boxFree));
       const openBtnClass = ocupado ? "btn-occupied" : "btn-primary";
       const tituloCard = i === 6 ? t.gymName : `Box ${i}`;
+
+      const presTxt = usuarioDentro
+        ? `${t.insideLabel} · ${usuarioDentro.nota || usuarioDentro.pin}${usuarioDentro.horaEntrada ? " (" + usuarioDentro.horaEntrada + ")" : ""}`
+        : t.outsideLabel;
 
       div.innerHTML = `
         <div class="box-head">
           <span>${tituloCard}</span>
           <span class="badge ${badgeClass}">${badgeText}</span>
         </div>
+        <div class="presence-pill ${usuarioDentro ? "in" : ""}">${presTxt}</div>
         <button class="${openBtnClass} btn-sm" onclick="cmdAbrirBox(${i})">🚪 ${t.openBox}</button>
         <button class="${locked ? "btn-warning" : "btn-ghost"} btn-sm" onclick="toggleBoxLock(${i})">
           ${locked ? "🔓 " + t.unlockBox : "🔒 " + t.lockBox}
@@ -737,6 +819,34 @@
       grid.appendChild(div);
     }
     actualizarSelectorBoxes();
+  }
+
+  function renderIOLogs() {
+    const t = I18N[lang];
+    const list = document.getElementById("ioList");
+    if (ioLogs.length === 0) {
+      list.innerHTML = `<div style="color:var(--muted); font-size:0.84rem; text-align:center; padding:14px 0;">${t.noIO}</div>`;
+      return;
+    }
+    list.innerHTML = ioLogs.map(item => {
+      const isOut = item.tipo === "salida";
+      const badge = isOut
+        ? `<span class="badge badge-exit">🔵 ${t.exitWord}</span>`
+        : `<span class="badge badge-ok">🟢 ${t.entryWord}</span>`;
+      const est = item.estancia ? ` · ${t.stayWord}: <strong>${item.estancia}</strong>` : "";
+      return `
+        <div class="io-row ${isOut ? "out" : ""}">
+          <div class="io-main">
+            <div class="io-title">${item.nombre}</div>
+            <div class="io-sub">${getDestinoNombre(item.box)}${est}</div>
+          </div>
+          <div class="io-right">
+            ${badge}
+            <div class="io-time">${item.hora}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
   }
 
   function renderPins() {
@@ -751,42 +861,37 @@
     const ahoraSec = Math.floor(Date.now() / 1000);
     list.innerHTML = accesos.map(a => {
       const esClauer = (a.box === 0);
+      const esSemanal = (a.diasMask && a.diasMask > 0);
       const durSeg = a.duracion || (a.fin - a.inicio);
-      const esPermanent = durSeg > (365 * 86400);
-      const caducado = ahoraSec > a.fin;
+      const esPermanent = !esSemanal && durSeg > (365 * 86400);
+      const caducado = !esSemanal && (ahoraSec > a.fin);
       const finStr = new Date(a.fin * 1000).toLocaleString(lang === "ca" ? "ca-ES" : "es-ES", {
         day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
       });
 
       let badgeHtml = `<span class="badge badge-pend">${t.statusPending}</span>`;
-      if (caducado) badgeHtml = `<span class="badge badge-lock">${t.statusExpired}</span>`;
+      if (a.dentro) badgeHtml = `<span class="badge badge-ok">${t.insideLabel}</span>`;
+      else if (esSemanal) badgeHtml = `<span class="badge badge-week">📅 ${t.weeklyBadge}</span>`;
+      else if (caducado) badgeHtml = `<span class="badge badge-lock">${t.statusExpired}</span>`;
       else if (esClauer || esPermanent) badgeHtml = `<span class="badge badge-ok">${t.keyfobBadge}</span>`;
       else if (a.usado) badgeHtml = `<span class="badge badge-ok">${t.statusUsed}</span>`;
 
-      const destinoLabel = getDestinoNombre(a.box);
-      const codeDisplay = esClauer ? `🏷️ ${a.pin}` : `${a.pin}#`;
-
       let validezDisplay = "";
-      if (esPermanent) {
-        validezDisplay = t.permanentText;
-      } else if (!esClauer && !a.usado && !caducado) {
-        validezDisplay = t.startsOnFirstUse(formatearDuracion(durSeg));
-      } else {
-        validezDisplay = `${t.validUntil}: <strong>${finStr}</strong>`;
-      }
+      if (esSemanal) validezDisplay = t.weeklyText(formatearDiasMask(a.diasMask, false));
+      else if (esPermanent) validezDisplay = t.permanentText;
+      else if (!esClauer && !a.usado && !caducado) validezDisplay = t.startsOnFirstUse(formatearDuracion(durSeg));
+      else validezDisplay = `${t.validUntil}: <strong>${finStr}</strong>`;
 
       return `
         <div class="pin-card" style="${caducado ? "opacity:0.6;" : ""}">
           <div class="pin-top">
             <div>
-              <span class="pin-code">${codeDisplay}</span>
-              <span style="font-weight:700; color:${esClauer ? "#6ee7b7" : "#93c5fd"}; margin-left:8px;">${destinoLabel}</span>
+              <span class="pin-code">${esClauer ? "🏷️ " + a.pin : a.pin + "#"}</span>
+              <span style="font-weight:700; color:${esClauer ? "#6ee7b7" : "#93c5fd"}; margin-left:8px;">${getDestinoNombre(a.box)}</span>
             </div>
             ${badgeHtml}
           </div>
-          <div class="pin-meta">
-            ${a.nota ? `<strong>${a.nota}</strong> · ` : ""}${validezDisplay}
-          </div>
+          <div class="pin-meta">${a.nota ? `<strong>${a.nota}</strong> · ` : ""}${validezDisplay}</div>
           <div class="pin-actions">
             ${!esClauer ? `<button class="btn-wa btn-sm" onclick="enviarWhatsApp('${a.pin}')">📲 ${t.btnWhatsApp}</button>` : ""}
             <button class="btn-ghost btn-sm" style="color:#fca5a5;" onclick="revocarPin('${a.pin}')">🗑 ${t.btnRevoke}</button>
@@ -807,7 +912,18 @@
     `).join("");
   }
 
-  function clearLogs() { logs = []; localStorage.setItem("pwa_logs", "[]"); renderLogs(); }
+  function clearLogs() {
+    if (currentLogTab === "io") {
+      ioLogs = [];
+      localStorage.setItem("pwa_io_logs", "[]");
+      renderIOLogs();
+      publicarEstadoNube();
+    } else {
+      logs = [];
+      localStorage.setItem("pwa_logs", "[]");
+      renderLogs();
+    }
+  }
 
   function setLang(newLang) {
     lang = newLang;
@@ -818,11 +934,11 @@
       const key = el.getAttribute("data-i18n");
       if (I18N[lang][key]) el.textContent = I18N[lang][key];
     });
-    if (client && client.connected) {
-      document.getElementById("connText").textContent = I18N[lang].connected;
-    }
+    if (client && client.connected) document.getElementById("connText").textContent = I18N[lang].connected;
+    renderDaysPicker();
     renderSecurity();
     renderPins();
+    renderIOLogs();
   }
 
   function saveState() {
@@ -838,11 +954,10 @@
     setTimeout(() => el.classList.remove("show"), 2400);
   }
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
-  }
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 
   genRandomPin();
+  renderDaysPicker();
   setLang(lang);
   renderLogs();
   setInterval(() => { renderPins(); }, 30000);
