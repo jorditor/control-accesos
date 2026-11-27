@@ -85,7 +85,7 @@
       background: var(--card); border: 1px solid var(--border); border-radius: 14px;
       padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);
     }
-    .card-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     button {
@@ -267,7 +267,10 @@
   <section class="card">
     <div class="card-title">
       <span data-i18n="activePinsTitle">Codis i clauers actius</span>
-      <button class="btn-ghost btn-sm" onclick="syncListaConESP32()" data-i18n="btnForceSync">↻ Reenviar llista</button>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-ghost btn-sm" onclick="activarPortalWiFi()">📶 Wi-Fi</button>
+        <button class="btn-ghost btn-sm" onclick="syncListaConESP32()" data-i18n="btnForceSync">↻ Reenviar</button>
+      </div>
     </div>
     <div id="pinsList"></div>
   </section>
@@ -299,6 +302,7 @@
   const MQTT_PASS    = "1923Jtlcom.";
   const TOPIC_CMD    = "local/acceso/cmd";
   const TOPIC_EVENTS = "local/acceso/eventos";
+  const TOPIC_STATE  = "local/acceso/estado"; // Estat compartit retingut al núvol
 
   // =========================================================================
   // DICCIONARI BILINGÜE (CATALÀ / ESPAÑOL)
@@ -338,7 +342,7 @@
       keyfobBadge: "Clauer / Fix",
       confirmBusyBox: (box) => `El Box ${box} ja té un codi actiu en aquest moment. Vols crear-ne un altre igualment?`,
       activePinsTitle: "Codis i clauers actius",
-      btnForceSync: "↻ Reenviar llista",
+      btnForceSync: "↻ Reenviar",
       liveEvents: "Registre d'activitat en viu",
       btnClear: "Netejar",
       noPins: "Cap codi ni clauer actiu. Crea'n un a dalt per començar.",
@@ -350,7 +354,7 @@
       btnWhatsApp: "Enviar WhatsApp",
       btnRevoke: "Revocar",
       toastSent: "Ordre enviada al controlador",
-      toastSynced: "Llista sincronitzada amb l'ESP32-S3",
+      toastSynced: "Sincronitzat amb controlador i tots els mòbils",
       confirmRevoke: "Vols eliminar aquest accés immediatament?",
       waMsg: (box, pin, finStr) =>
         `Hola! Aquí tens el teu codi d'accés per al *Box ${box}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de la tecla # al teclat exterior)_\n\n🚪 Aquest codi obre la *Porta Principal* i el *Box ${box}*.\n⏳ Vàlid fins: *${finStr}*.`
@@ -389,7 +393,7 @@
       keyfobBadge: "Llavero / Fijo",
       confirmBusyBox: (box) => `El Box ${box} ya tiene un código activo en este momento. ¿Quieres crear otro igualmente?`,
       activePinsTitle: "Códigos y llaveros activos",
-      btnForceSync: "↻ Reenviar lista",
+      btnForceSync: "↻ Reenviar",
       liveEvents: "Registro de actividad en vivo",
       btnClear: "Limpiar",
       noPins: "Ningún código ni llavero activo. Crea uno arriba para empezar.",
@@ -401,7 +405,7 @@
       btnWhatsApp: "Enviar WhatsApp",
       btnRevoke: "Revocar",
       toastSent: "Orden enviada al controlador",
-      toastSynced: "Lista sincronizada con el ESP32-S3",
+      toastSynced: "Sincronizado con controlador y todos los móviles",
       confirmRevoke: "¿Quieres eliminar este acceso inmediatamente?",
       waMsg: (box, pin, finStr) =>
         `¡Hola! Aquí tienes tu código de acceso para el *Box ${box}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de la tecla # en el teclado exterior)_\n\n🚪 Este código abre la *Puerta Principal* y el *Box ${box}*.\n⏳ Válido hasta: *${finStr}*.`
@@ -413,6 +417,7 @@
   let sistemaBloqueado = JSON.parse(localStorage.getItem("pwa_sys_lock") || "false");
   let boxBloqueado = JSON.parse(localStorage.getItem("pwa_box_lock") || "[false,false,false,false,false,false]");
   let logs = JSON.parse(localStorage.getItem("pwa_logs") || "[]");
+  let stateUpdatedAt = Number(localStorage.getItem("pwa_state_ts") || "0");
   let client = null;
   let adminBuffer = "";
 
@@ -470,6 +475,40 @@
   }
 
   // =========================================================================
+  // SINCRONITZACIÓ ESTAT RETINGUT AL NÚVOL (EMQX) ENTRE TOTS ELS NAVEGADORS
+  // =========================================================================
+  function publicarEstadoNube() {
+    if (!client || !client.connected) return;
+    stateUpdatedAt = Date.now();
+    localStorage.setItem("pwa_state_ts", String(stateUpdatedAt));
+    const snapshot = {
+      updatedAt: stateUpdatedAt,
+      accesos,
+      sistemaBloqueado,
+      boxBloqueado
+    };
+    client.publish(TOPIC_STATE, JSON.stringify(snapshot), { qos: 1, retain: true });
+  }
+
+  function aplicarEstadoNube(snapshot) {
+    if (!snapshot || !Array.isArray(snapshot.accesos)) return;
+    const remoteTs = Number(snapshot.updatedAt || 0);
+    // Ignorar si es nuestro propio mensaje ya aplicado
+    if (remoteTs > 0 && remoteTs === stateUpdatedAt) return;
+
+    stateUpdatedAt = remoteTs || Date.now();
+    accesos = snapshot.accesos;
+    sistemaBloqueado = Boolean(snapshot.sistemaBloqueado);
+    if (Array.isArray(snapshot.boxBloqueado) && snapshot.boxBloqueado.length === 6) {
+      boxBloqueado = snapshot.boxBloqueado;
+    }
+
+    localStorage.setItem("pwa_state_ts", String(stateUpdatedAt));
+    saveState();
+    renderPins();
+  }
+
+  // =========================================================================
   // INICIALITZACIÓ MQTT
   // =========================================================================
   function initMQTT() {
@@ -486,6 +525,7 @@
       document.getElementById("connDot").classList.add("online");
       document.getElementById("connText").textContent = I18N[lang].connected;
       client.subscribe(TOPIC_EVENTS);
+      client.subscribe(TOPIC_STATE);
     });
 
     client.on("close", () => {
@@ -494,10 +534,13 @@
     });
 
     client.on("message", (topic, payload) => {
-      if (topic !== TOPIC_EVENTS) return;
       try {
-        const ev = JSON.parse(payload.toString());
-        procesarEventoESP32(ev);
+        const data = JSON.parse(payload.toString());
+        if (topic === TOPIC_STATE) {
+          aplicarEstadoNube(data);
+        } else if (topic === TOPIC_EVENTS) {
+          procesarEventoESP32(data);
+        }
       } catch (e) { console.error(e); }
     });
   }
@@ -520,6 +563,7 @@
       if (changed) {
         saveState();
         renderPins();
+        publicarEstadoNube();
       }
     }
     if (ev.tipo === "estado_bloqueo_sistema") {
@@ -611,8 +655,18 @@
       fin: a.fin,
       usado: a.usado
     }));
+    publicarEstadoNube();
     if (publishCmd({ cmd: "sync_codigos", lista: payloadLista })) {
       showToast(I18N[lang].toastSynced);
+    }
+  }
+
+  function activarPortalWiFi() {
+    if (!confirm(lang === "ca"
+      ? "Vols activar el punt d'accés Wi-Fi del controlador (Accessos-Local-Config) durant 5 minuts?"
+      : "¿Quieres activar el punto de acceso Wi-Fi del controlador (Accessos-Local-Config) durante 5 minutos?")) return;
+    if (publishCmd({ cmd: "activar_portal_wifi" })) {
+      showToast("Wi-Fi AP: Accessos-Local-Config (192.168.4.1)");
     }
   }
 
@@ -639,6 +693,7 @@
     sistemaBloqueado = !sistemaBloqueado;
     saveState();
     renderSecurity();
+    publicarEstadoNube();
     publishCmd({ cmd: "bloquear_sistema", estado: sistemaBloqueado });
   }
 
@@ -646,6 +701,7 @@
     boxBloqueado[box] = !boxBloqueado[box];
     saveState();
     renderSecurity();
+    publicarEstadoNube();
     publishCmd({ cmd: "bloquear_box", box, estado: boxBloqueado[box] });
   }
 
