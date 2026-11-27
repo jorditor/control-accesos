@@ -28,7 +28,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding-bottom: 40px; }
 
-    /* Pantalla de bloqueig PIN Administrador */
     #lockScreen {
       position: fixed; inset: 0; z-index: 100;
       background: var(--bg);
@@ -43,18 +42,14 @@
     .lock-icon { font-size: 2.4rem; margin-bottom: 10px; }
     .lock-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
     .lock-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 18px; }
-    .pin-dots {
-      display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
-    }
+    .pin-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
     .pin-dot {
       width: 14px; height: 14px; border-radius: 50%;
       border: 2px solid var(--primary); background: transparent; transition: 0.15s;
     }
     .pin-dot.filled { background: var(--primary); transform: scale(1.1); }
     .pin-dot.error { border-color: var(--danger); background: var(--danger); }
-    .keypad {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-    }
+    .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .key-btn {
       background: var(--card-alt); color: var(--text); border: 1px solid var(--border);
       border-radius: 12px; padding: 15px 0; font-size: 1.25rem; font-weight: 700;
@@ -102,7 +97,6 @@
     .btn-wa { background: var(--whatsapp); color: #052e16; font-weight: 700; }
     .btn-sm { padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; }
 
-    /* Form */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
     label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
     select, input {
@@ -111,20 +105,18 @@
     }
     select:focus, input:focus { border-color: var(--primary); }
 
-    /* Boxes control */
     .box-item {
       background: var(--card-alt); border: 1px solid var(--border); border-radius: 10px;
       padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: 0.25s;
     }
     .box-item.occupied { border-color: var(--warning); background: rgba(245, 158, 11, 0.12); }
     .box-item.locked { border-color: var(--danger); background: rgba(239, 68, 68, 0.12); }
-    .box-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.92rem; }
-    .badge { font-size: 0.7rem; padding: 2px 7px; border-radius: 999px; font-weight: 700; }
+    .box-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.88rem; }
+    .badge { font-size: 0.68rem; padding: 2px 6px; border-radius: 999px; font-weight: 700; }
     .badge-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
     .badge-lock { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
     .badge-pend { background: rgba(245, 158, 11, 0.22); color: #fcd34d; }
 
-    /* PIN List */
     .pin-card {
       background: var(--card-alt); border: 1px solid var(--border); border-radius: 12px;
       padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;
@@ -135,7 +127,6 @@
     .pin-actions { display: flex; gap: 8px; margin-top: 2px; }
     .pin-actions button { flex: 1; }
 
-    /* Logs */
     .log-list { max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
     .log-row { font-size: 0.78rem; background: var(--bg); padding: 8px 10px; border-radius: 8px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; gap: 8px; }
     .log-row.err { border-left-color: var(--danger); }
@@ -151,7 +142,6 @@
 </head>
 <body>
 
-<!-- PANTALLA DE BLOQUEIG ADMINISTRADOR -->
 <div id="lockScreen">
   <div class="lock-box">
     <div class="lock-icon">🔐</div>
@@ -205,14 +195,7 @@
     <div class="form-row">
       <div>
         <label data-i18n="selectBox">Destí d'accés</label>
-        <select id="selBox">
-          <option value="1">Box 1 (🟢 Lliure)</option>
-          <option value="2">Box 2 (🟢 Lliure)</option>
-          <option value="3">Box 3 (🟢 Lliure)</option>
-          <option value="4">Box 4 (🟢 Lliure)</option>
-          <option value="5">Box 5 (🟢 Lliure)</option>
-          <option value="0">🚪 Només Porta Principal (Clauer)</option>
-        </select>
+        <select id="selBox"></select>
       </div>
       <div>
         <label data-i18n="duration">Durada de l'accés</label>
@@ -289,14 +272,7 @@
 <div id="toast" class="toast"></div>
 
 <script>
-  // =========================================================================
-  // PIN D'ADMINISTRADOR DE LA WEB APP (CANVIA'L AQUÍ SI VOLS)
-  // =========================================================================
-  const ADMIN_PIN = "2580";
-
-  // =========================================================================
-  // CONFIGURACIÓ BROKER EMQX CLOUD (WSS PORT 8084)
-  // =========================================================================
+  const ADMIN_PIN    = "2580";
   const BROKER_URL   = "wss://g868e77d.ala.eu-central-1.emqxsl.com:8084/mqtt";
   const MQTT_USER    = "Jordi";
   const MQTT_PASS    = "1923Jtlcom.";
@@ -304,9 +280,6 @@
   const TOPIC_EVENTS = "local/acceso/eventos";
   const TOPIC_STATE  = "local/acceso/estado";
 
-  // =========================================================================
-  // DICCIONARI BILINGÜE (CATALÀ / ESPAÑOL)
-  // =========================================================================
   const I18N = {
     ca: {
       lockTitle: "Accés Administrador",
@@ -337,10 +310,11 @@
       boxBusy: "OCUPAT",
       selFree: "🟢 Lliure",
       selBusy: "🟠 Ocupat",
+      gymName: "🏋️ Gimnàs",
       selMainOnly: "🚪 Només Porta Principal (Clauer)",
       mainDoorTag: "🚪 Porta Principal",
       keyfobBadge: "Clauer / Fix",
-      confirmBusyBox: (box) => `El Box ${box} ja té un codi actiu en aquest moment. Vols crear-ne un altre igualment?`,
+      confirmBusyBox: (destLabel) => `${destLabel} ja té un codi actiu en aquest moment. Vols crear-ne un altre igualment?`,
       activePinsTitle: "Codis i clauers actius",
       btnForceSync: "↻ Reenviar",
       liveEvents: "Registre d'activitat en viu",
@@ -357,8 +331,8 @@
       toastSent: "Ordre enviada al controlador",
       toastSynced: "Sincronitzat amb controlador i tots els mòbils",
       confirmRevoke: "Vols eliminar aquest accés immediatament?",
-      waMsg: (box, pin, durStr) =>
-        `Hola! Aquí tens el teu codi d'accés per al *Box ${box}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de la tecla # al teclat exterior)_\n\n🚪 Aquest codi obre la *Porta Principal* i el *Box ${box}*.\n⏳ Durada contractada: *${durStr}* (el temps comença a comptar en el moment que teclegis el codi per primera vegada).`
+      waMsg: (destName, pin, durStr) =>
+        `Hola! Aquí tens el teu codi d'accés per a *${destName}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de la tecla # al teclat exterior)_\n\n🚪 Aquest codi obre la *Porta Principal* i *${destName}*.\n⏳ Durada contractada: *${durStr}* (el temps comença a comptar en el moment que teclegis el codi per primera vegada).`
     },
     es: {
       lockTitle: "Acceso Administrador",
@@ -389,10 +363,11 @@
       boxBusy: "OCUPADO",
       selFree: "🟢 Libre",
       selBusy: "🟠 Ocupado",
+      gymName: "🏋️ Gimnasio",
       selMainOnly: "🚪 Solo Puerta Principal (Llavero)",
       mainDoorTag: "🚪 Puerta Principal",
       keyfobBadge: "Llavero / Fijo",
-      confirmBusyBox: (box) => `El Box ${box} ya tiene un código activo en este momento. ¿Quieres crear otro igualmente?`,
+      confirmBusyBox: (destLabel) => `${destLabel} ya tiene un código activo en este momento. ¿Quieres crear otro igualmente?`,
       activePinsTitle: "Códigos y llaveros activos",
       btnForceSync: "↻ Reenviar",
       liveEvents: "Registro de actividad en vivo",
@@ -409,32 +384,36 @@
       toastSent: "Orden enviada al controlador",
       toastSynced: "Sincronizado con controlador y todos los móviles",
       confirmRevoke: "¿Quieres eliminar este acceso inmediatamente?",
-      waMsg: (box, pin, durStr) =>
-        `¡Hola! Aquí tienes tu código de acceso para el *Box ${box}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de la tecla # en el teclado exterior)_\n\n🚪 Este código abre la *Puerta Principal* y el *Box ${box}*.\n⏳ Duración contratada: *${durStr}* (el tiempo empieza a contar en el momento en que teclees el código por primera vez).`
+      waMsg: (destName, pin, durStr) =>
+        `¡Hola! Aquí tienes tu código de acceso para *${destName}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de la tecla # en el teclado exterior)_\n\n🚪 Este código abre la *Puerta Principal* y *${destName}*.\n⏳ Duración contratada: *${durStr}* (el tiempo empieza a contar en el momento en que teclees el código por primera vez).`
     }
   };
 
   let lang = localStorage.getItem("pwa_lang") || "ca";
   let accesos = JSON.parse(localStorage.getItem("pwa_accesos") || "[]");
   let sistemaBloqueado = JSON.parse(localStorage.getItem("pwa_sys_lock") || "false");
-  let boxBloqueado = JSON.parse(localStorage.getItem("pwa_box_lock") || "[false,false,false,false,false,false]");
+  let boxBloqueado = JSON.parse(localStorage.getItem("pwa_box_lock") || "[false,false,false,false,false,false,false]");
+  if (boxBloqueado.length < 7) while (boxBloqueado.length < 7) boxBloqueado.push(false);
   let logs = JSON.parse(localStorage.getItem("pwa_logs") || "[]");
   let stateUpdatedAt = Number(localStorage.getItem("pwa_state_ts") || "0");
   let client = null;
   let adminBuffer = "";
 
+  function getDestinoNombre(boxNum) {
+    if (boxNum === 0) return I18N[lang].mainDoorTag;
+    if (boxNum === 6) return I18N[lang].gymName;
+    return `Box ${boxNum}`;
+  }
+
   function formatearDuracion(seg) {
     const mins = Math.round(seg / 60);
     if (mins < 60) return `${mins} min`;
     const horas = Math.round(mins / 60);
-    if (horas < 24) return horas === 1 ? (lang === "ca" ? "1 hora" : "1 hora") : (lang === "ca" ? `${horas} hores` : `${horas} horas`);
+    if (horas < 24) return horas === 1 ? "1 hora" : (lang === "ca" ? `${horas} hores` : `${horas} horas`);
     const dias = Math.round(horas / 24);
     return dias === 1 ? (lang === "ca" ? "1 dia" : "1 día") : (lang === "ca" ? `${dias} dies` : `${dias} días`);
   }
 
-  // =========================================================================
-  // LÒGICA PANTALLA BLOQUEIG ADMINISTRADOR
-  // =========================================================================
   function updatePinDots(isError = false) {
     const dots = document.querySelectorAll("#pinDots .pin-dot");
     dots.forEach((d, idx) => {
@@ -464,16 +443,8 @@
     }
   }
 
-  function delAdminPin() {
-    adminBuffer = adminBuffer.slice(0, -1);
-    updatePinDots(false);
-  }
-
-  function clearAdminPin() {
-    adminBuffer = "";
-    updatePinDots(false);
-  }
-
+  function delAdminPin() { adminBuffer = adminBuffer.slice(0, -1); updatePinDots(false); }
+  function clearAdminPin() { adminBuffer = ""; updatePinDots(false); }
   function lockApp() {
     sessionStorage.removeItem("pwa_unlocked");
     adminBuffer = "";
@@ -485,20 +456,16 @@
     document.getElementById("lockScreen").style.display = "none";
   }
 
-  // =========================================================================
-  // SINCRONITZACIÓ ESTAT RETINGUT AL NÚVOL (EMQX) ENTRE TOTS ELS NAVEGADORS
-  // =========================================================================
   function publicarEstadoNube() {
     if (!client || !client.connected) return;
     stateUpdatedAt = Date.now();
     localStorage.setItem("pwa_state_ts", String(stateUpdatedAt));
-    const snapshot = {
+    client.publish(TOPIC_STATE, JSON.stringify({
       updatedAt: stateUpdatedAt,
       accesos,
       sistemaBloqueado,
       boxBloqueado
-    };
-    client.publish(TOPIC_STATE, JSON.stringify(snapshot), { qos: 1, retain: true });
+    }), { qos: 1, retain: true });
   }
 
   function aplicarEstadoNube(snapshot) {
@@ -509,8 +476,9 @@
     stateUpdatedAt = remoteTs || Date.now();
     accesos = snapshot.accesos;
     sistemaBloqueado = Boolean(snapshot.sistemaBloqueado);
-    if (Array.isArray(snapshot.boxBloqueado) && snapshot.boxBloqueado.length === 6) {
+    if (Array.isArray(snapshot.boxBloqueado)) {
       boxBloqueado = snapshot.boxBloqueado;
+      while (boxBloqueado.length < 7) boxBloqueado.push(false);
     }
 
     localStorage.setItem("pwa_state_ts", String(stateUpdatedAt));
@@ -518,9 +486,6 @@
     renderPins();
   }
 
-  // =========================================================================
-  // INICIALITZACIÓ MQTT
-  // =========================================================================
   function initMQTT() {
     const clientId = "PWA_Admin_" + Math.random().toString(16).substring(2, 8);
     client = mqtt.connect(BROKER_URL, {
@@ -546,11 +511,8 @@
     client.on("message", (topic, payload) => {
       try {
         const data = JSON.parse(payload.toString());
-        if (topic === TOPIC_STATE) {
-          aplicarEstadoNube(data);
-        } else if (topic === TOPIC_EVENTS) {
-          procesarEventoESP32(data);
-        }
+        if (topic === TOPIC_STATE) aplicarEstadoNube(data);
+        else if (topic === TOPIC_EVENTS) procesarEventoESP32(data);
       } catch (e) { console.error(e); }
     });
   }
@@ -588,7 +550,7 @@
       saveState();
       renderSecurity();
     }
-    if (ev.tipo === "estado_bloqueo_box" && ev.box >= 1 && ev.box <= 5) {
+    if (ev.tipo === "estado_bloqueo_box" && ev.box >= 1 && ev.box <= 6) {
       boxBloqueado[ev.box] = (ev.detalle === "BLOQUEADO");
       saveState();
       renderSecurity();
@@ -597,9 +559,10 @@
     const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     const isErr = ev.tipo.startsWith("denegado");
     const isOk = ev.tipo.includes("acceso") || ev.tipo.includes("abre") || ev.tipo === "online";
+    const destLog = ev.box ? `(${ev.box === 6 ? "Gimnàs" : "Box " + ev.box})` : "";
     logs.unshift({
       hora,
-      texto: `${ev.tipo} ${ev.box ? `(Box ${ev.box})` : ""} — ${ev.detalle || ""}`,
+      texto: `${ev.tipo} ${destLog} — ${ev.detalle || ""}`,
       cls: isErr ? "err" : (isOk ? "ok" : "")
     });
     if (logs.length > 40) logs.pop();
@@ -616,7 +579,7 @@
   }
 
   function isBoxOcupado(boxNum) {
-    if (boxNum < 1 || boxNum > 5) return false;
+    if (boxNum < 1 || boxNum > 6) return false;
     const ahoraSec = Math.floor(Date.now() / 1000);
     return accesos.some(a => a.box === boxNum && ahoraSec <= a.fin);
   }
@@ -633,12 +596,11 @@
     }
 
     if (box >= 1 && isBoxOcupado(box)) {
-      if (!confirm(I18N[lang].confirmBusyBox(box))) return;
+      if (!confirm(I18N[lang].confirmBusyBox(getDestinoNombre(box)))) return;
     }
 
     const ahoraSec = Math.floor(Date.now() / 1000);
     const duracionSec = mins * 60;
-    // Para boxes (1..5): 7 días de margen para activarlo con el 1er acceso; para llavero (0): directo
     const finInicialSec = (box >= 1) ? (ahoraSec + (7 * 86400)) : (ahoraSec + duracionSec);
 
     accesos = accesos.filter(a => a.pin !== pin);
@@ -684,8 +646,8 @@
 
   function activarPortalWiFi() {
     if (!confirm(lang === "ca"
-      ? "Vols activar el punt d'accés Wi-Fi del controlador (Accessos-Local-Config) durant 5 minuts?"
-      : "¿Quieres activar el punto de acceso Wi-Fi del controlador (Accessos-Local-Config) durante 5 minutos?")) return;
+      ? "Vols activar el punt d'accés Wi-Fi del controlador (Accessos-Local-Config) durant 10 minuts?"
+      : "¿Quieres activar el punto de acceso Wi-Fi del controlador (Accessos-Local-Config) durante 10 minutos?")) return;
     if (publishCmd({ cmd: "activar_portal_wifi" })) {
       showToast("Wi-Fi AP: Accessos-Local-Config (192.168.4.1)");
     }
@@ -696,7 +658,8 @@
     if (!acc || acc.box === 0) return;
     const durSeg = acc.duracion || (acc.fin - acc.inicio);
     const durStr = formatearDuracion(durSeg);
-    const text = I18N[lang].waMsg(acc.box, acc.pin, durStr);
+    const destClean = acc.box === 6 ? (lang === "ca" ? "el Gimnàs" : "el Gimnasio") : `el Box ${acc.box}`;
+    const text = I18N[lang].waMsg(destClean, acc.pin, durStr);
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
@@ -705,7 +668,7 @@
   }
 
   function cmdAbrirBox(box) {
-    if (publishCmd({ cmd: "abrir_box", box })) showToast(`Box ${box}: ${I18N[lang].toastSent}`);
+    if (publishCmd({ cmd: "abrir_box", box })) showToast(`${getDestinoNombre(box)}: ${I18N[lang].toastSent}`);
   }
 
   function toggleSystemLock() {
@@ -729,10 +692,10 @@
     const sel = document.getElementById("selBox");
     const valActual = sel.value !== "" ? sel.value : "1";
     let html = "";
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 6; i++) {
       const ocupado = isBoxOcupado(i);
       const estadoTxt = ocupado ? t.selBusy : t.selFree;
-      html += `<option value="${i}">Box ${i} (${estadoTxt})</option>`;
+      html += `<option value="${i}">${getDestinoNombre(i)} (${estadoTxt})</option>`;
     }
     html += `<option value="0">${t.selMainOnly}</option>`;
     sel.innerHTML = html;
@@ -750,7 +713,7 @@
 
     const grid = document.getElementById("boxesGrid");
     grid.innerHTML = "";
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 6; i++) {
       const locked = boxBloqueado[i];
       const ocupado = isBoxOcupado(i);
       const div = document.createElement("div");
@@ -759,10 +722,11 @@
       const badgeClass = locked ? "badge-lock" : (ocupado ? "badge-pend" : "badge-ok");
       const badgeText = locked ? "LOCK" : (ocupado ? t.boxBusy : t.boxFree);
       const openBtnClass = ocupado ? "btn-occupied" : "btn-primary";
+      const tituloCard = i === 6 ? t.gymName : `Box ${i}`;
 
       div.innerHTML = `
         <div class="box-head">
-          <span>Box ${i}</span>
+          <span>${tituloCard}</span>
           <span class="badge ${badgeClass}">${badgeText}</span>
         </div>
         <button class="${openBtnClass} btn-sm" onclick="cmdAbrirBox(${i})">🚪 ${t.openBox}</button>
@@ -799,7 +763,7 @@
       else if (esClauer || esPermanent) badgeHtml = `<span class="badge badge-ok">${t.keyfobBadge}</span>`;
       else if (a.usado) badgeHtml = `<span class="badge badge-ok">${t.statusUsed}</span>`;
 
-      const destinoLabel = esClauer ? t.mainDoorTag : `Box ${a.box}`;
+      const destinoLabel = getDestinoNombre(a.box);
       const codeDisplay = esClauer ? `🏷️ ${a.pin}` : `${a.pin}#`;
 
       let validezDisplay = "";
@@ -843,11 +807,7 @@
     `).join("");
   }
 
-  function clearLogs() {
-    logs = [];
-    localStorage.setItem("pwa_logs", "[]");
-    renderLogs();
-  }
+  function clearLogs() { logs = []; localStorage.setItem("pwa_logs", "[]"); renderLogs(); }
 
   function setLang(newLang) {
     lang = newLang;
