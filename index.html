@@ -302,7 +302,7 @@
   const MQTT_PASS    = "1923Jtlcom.";
   const TOPIC_CMD    = "local/acceso/cmd";
   const TOPIC_EVENTS = "local/acceso/eventos";
-  const TOPIC_STATE  = "local/acceso/estado"; // Estat compartit retingut al núvol
+  const TOPIC_STATE  = "local/acceso/estado";
 
   // =========================================================================
   // DICCIONARI BILINGÜE (CATALÀ / ESPAÑOL)
@@ -350,14 +350,15 @@
       statusUsed: "En ús (reentrada activa)",
       statusExpired: "Caducat",
       validUntil: "Vàlid fins",
+      startsOnFirstUse: (durStr) => `Durada: ${durStr} (compta des del 1r accés)`,
       permanentText: "Accés permanent",
       btnWhatsApp: "Enviar WhatsApp",
       btnRevoke: "Revocar",
       toastSent: "Ordre enviada al controlador",
       toastSynced: "Sincronitzat amb controlador i tots els mòbils",
       confirmRevoke: "Vols eliminar aquest accés immediatament?",
-      waMsg: (box, pin, finStr) =>
-        `Hola! Aquí tens el teu codi d'accés per al *Box ${box}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de la tecla # al teclat exterior)_\n\n🚪 Aquest codi obre la *Porta Principal* i el *Box ${box}*.\n⏳ Vàlid fins: *${finStr}*.`
+      waMsg: (box, pin, durStr) =>
+        `Hola! Aquí tens el teu codi d'accés per al *Box ${box}*:\n\n🔑 Codi teclat: *${pin}#*\n_(Marca el número seguit de la tecla # al teclat exterior)_\n\n🚪 Aquest codi obre la *Porta Principal* i el *Box ${box}*.\n⏳ Durada contractada: *${durStr}* (el temps comença a comptar en el moment que teclegis el codi per primera vegada).`
     },
     es: {
       lockTitle: "Acceso Administrador",
@@ -401,14 +402,15 @@
       statusUsed: "En uso (reentrada activa)",
       statusExpired: "Caducado",
       validUntil: "Válido hasta",
+      startsOnFirstUse: (durStr) => `Duración: ${durStr} (cuenta desde el 1er acceso)`,
       permanentText: "Acceso permanente",
       btnWhatsApp: "Enviar WhatsApp",
       btnRevoke: "Revocar",
       toastSent: "Orden enviada al controlador",
       toastSynced: "Sincronizado con controlador y todos los móviles",
       confirmRevoke: "¿Quieres eliminar este acceso inmediatamente?",
-      waMsg: (box, pin, finStr) =>
-        `¡Hola! Aquí tienes tu código de acceso para el *Box ${box}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de la tecla # en el teclado exterior)_\n\n🚪 Este código abre la *Puerta Principal* y el *Box ${box}*.\n⏳ Válido hasta: *${finStr}*.`
+      waMsg: (box, pin, durStr) =>
+        `¡Hola! Aquí tienes tu código de acceso para el *Box ${box}*:\n\n🔑 Código teclado: *${pin}#*\n_(Marca el número seguido de la tecla # en el teclado exterior)_\n\n🚪 Este código abre la *Puerta Principal* y el *Box ${box}*.\n⏳ Duración contratada: *${durStr}* (el tiempo empieza a contar en el momento en que teclees el código por primera vez).`
     }
   };
 
@@ -420,6 +422,15 @@
   let stateUpdatedAt = Number(localStorage.getItem("pwa_state_ts") || "0");
   let client = null;
   let adminBuffer = "";
+
+  function formatearDuracion(seg) {
+    const mins = Math.round(seg / 60);
+    if (mins < 60) return `${mins} min`;
+    const horas = Math.round(mins / 60);
+    if (horas < 24) return horas === 1 ? (lang === "ca" ? "1 hora" : "1 hora") : (lang === "ca" ? `${horas} hores` : `${horas} horas`);
+    const dias = Math.round(horas / 24);
+    return dias === 1 ? (lang === "ca" ? "1 dia" : "1 día") : (lang === "ca" ? `${dias} dies` : `${dias} días`);
+  }
 
   // =========================================================================
   // LÒGICA PANTALLA BLOQUEIG ADMINISTRADOR
@@ -493,7 +504,6 @@
   function aplicarEstadoNube(snapshot) {
     if (!snapshot || !Array.isArray(snapshot.accesos)) return;
     const remoteTs = Number(snapshot.updatedAt || 0);
-    // Ignorar si es nuestro propio mensaje ya aplicado
     if (remoteTs > 0 && remoteTs === stateUpdatedAt) return;
 
     stateUpdatedAt = remoteTs || Date.now();
@@ -557,8 +567,15 @@
   function procesarEventoESP32(ev) {
     if (ev.tipo === "primer_acceso" && ev.detalle) {
       let changed = false;
+      const ahoraSec = Math.floor(Date.now() / 1000);
       accesos.forEach(a => {
-        if (a.pin === ev.detalle && !a.usado) { a.usado = true; changed = true; }
+        if (a.pin === ev.detalle && !a.usado) {
+          a.usado = true;
+          a.inicio = ahoraSec;
+          const durSeg = a.duracion || 86400;
+          a.fin = ev.fin ? Number(ev.fin) : (ahoraSec + durSeg);
+          changed = true;
+        }
       });
       if (changed) {
         saveState();
@@ -620,14 +637,17 @@
     }
 
     const ahoraSec = Math.floor(Date.now() / 1000);
-    const finSec = ahoraSec + (mins * 60);
+    const duracionSec = mins * 60;
+    // Para boxes (1..5): 7 días de margen para activarlo con el 1er acceso; para llavero (0): directo
+    const finInicialSec = (box >= 1) ? (ahoraSec + (7 * 86400)) : (ahoraSec + duracionSec);
 
     accesos = accesos.filter(a => a.pin !== pin);
     accesos.unshift({
       pin,
       box,
       inicio: ahoraSec - 60,
-      fin: finSec,
+      fin: finInicialSec,
+      duracion: duracionSec,
       usado: false,
       nota
     });
@@ -653,6 +673,7 @@
       box: a.box,
       inicio: a.inicio,
       fin: a.fin,
+      duracion: a.duracion || (a.fin - a.inicio),
       usado: a.usado
     }));
     publicarEstadoNube();
@@ -673,11 +694,9 @@
   function enviarWhatsApp(pin) {
     const acc = accesos.find(a => a.pin === pin);
     if (!acc || acc.box === 0) return;
-    const finDate = new Date(acc.fin * 1000);
-    const finStr = finDate.toLocaleString(lang === "ca" ? "ca-ES" : "es-ES", {
-      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
-    });
-    const text = I18N[lang].waMsg(acc.box, acc.pin, finStr);
+    const durSeg = acc.duracion || (acc.fin - acc.inicio);
+    const durStr = formatearDuracion(durSeg);
+    const text = I18N[lang].waMsg(acc.box, acc.pin, durStr);
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
@@ -768,7 +787,8 @@
     const ahoraSec = Math.floor(Date.now() / 1000);
     list.innerHTML = accesos.map(a => {
       const esClauer = (a.box === 0);
-      const esPermanent = (a.fin - a.inicio) > (365 * 86400);
+      const durSeg = a.duracion || (a.fin - a.inicio);
+      const esPermanent = durSeg > (365 * 86400);
       const caducado = ahoraSec > a.fin;
       const finStr = new Date(a.fin * 1000).toLocaleString(lang === "ca" ? "ca-ES" : "es-ES", {
         day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
@@ -781,7 +801,15 @@
 
       const destinoLabel = esClauer ? t.mainDoorTag : `Box ${a.box}`;
       const codeDisplay = esClauer ? `🏷️ ${a.pin}` : `${a.pin}#`;
-      const validezDisplay = esPermanent ? t.permanentText : `${t.validUntil}: <strong>${finStr}</strong>`;
+
+      let validezDisplay = "";
+      if (esPermanent) {
+        validezDisplay = t.permanentText;
+      } else if (!esClauer && !a.usado && !caducado) {
+        validezDisplay = t.startsOnFirstUse(formatearDuracion(durSeg));
+      } else {
+        validezDisplay = `${t.validUntil}: <strong>${finStr}</strong>`;
+      }
 
       return `
         <div class="pin-card" style="${caducado ? "opacity:0.6;" : ""}">
