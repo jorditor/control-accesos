@@ -825,8 +825,21 @@
     for (let i = 1; i <= 6; i++) {
       const locked = boxBloqueado[i];
       const ocupado = isBoxOcupado(i);
-      const st = boxStats[i] || null;
-      const usuarioDentro = accesos.find(a => a.box === i && a.dentro) || (st && st.dentro ? st : null);
+
+      // Si boxStats no llegó al móvil, reconstruimos el recuadro desde accesos
+      const accBox = accesos.find(a => a.box === i && a.dentro)
+                  || accesos.find(a => a.box === i && (a.horaEntrada || a.horaSalida));
+      let st = (boxStats[i] && boxStats[i].pin) ? boxStats[i] : null;
+      if (!st && accBox) {
+        st = {
+          pin: accBox.pin,
+          nombre: accBox.nota || "",
+          entrada: accBox.horaEntrada || "—",
+          salida: accBox.horaSalida || "—",
+          dentro: Boolean(accBox.dentro)
+        };
+      }
+      const usuarioDentro = (accBox && accBox.dentro) || (st && st.dentro);
 
       const div = document.createElement("div");
       div.className = "box-item" + (locked ? " locked" : (usuarioDentro ? " inside" : (ocupado ? " occupied" : "")));
