@@ -70,7 +70,6 @@
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
     .card-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     button {
       border: none; border-radius: 10px; padding: 12px 14px; font-size: 0.9rem; font-weight: 600;
       cursor: pointer; transition: transform 0.08s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
@@ -83,7 +82,7 @@
     .btn-warning { background: var(--warning); color: #451a03; }
     .btn-ghost { background: var(--card-alt); color: var(--text); border: 1px solid var(--border); }
     .btn-wa { background: var(--whatsapp); color: #052e16; font-weight: 700; }
-    .btn-sm { padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; }
+    .btn-sm { padding: 9px 10px; font-size: 0.82rem; border-radius: 8px; }
 
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
     label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
@@ -102,22 +101,27 @@
     }
     .day-btn.active { background: var(--primary); color: #fff; border-color: #60a5fa; }
 
-    /* Targetes de Box / Gimnàs */
+    /* Targetes de Box / Gimnàs (2 per fila) */
     .box-item {
-      background: var(--card-alt); border: 1px solid var(--border); border-radius: 10px;
-      padding: 10px; display: flex; flex-direction: column; gap: 6px; transition: 0.25s;
+      background: var(--card-alt); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px; display: flex; flex-direction: column; gap: 8px; transition: 0.25s;
     }
     .box-item.occupied { border-color: var(--warning); background: rgba(245, 158, 11, 0.12); }
     .box-item.inside { border-color: var(--success); background: rgba(16, 185, 129, 0.14); }
     .box-item.locked { border-color: var(--danger); background: rgba(239, 68, 68, 0.12); }
-    .box-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.86rem; }
-    .presence-pill {
-      font-size: 0.72rem; font-weight: 700; padding: 3px 6px; border-radius: 6px;
-      background: rgba(15, 23, 42, 0.65); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .box-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.95rem; gap: 6px; }
+    .box-info {
+      background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(51, 65, 85, 0.7);
+      border-radius: 8px; padding: 7px 8px; font-size: 0.76rem; color: var(--muted);
+      display: flex; flex-direction: column; gap: 4px; min-height: 46px; justify-content: center;
     }
-    .presence-pill.in { color: #6ee7b7; background: rgba(16, 185, 129, 0.22); }
+    .box-info-pin { color: #f8fafc; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .box-info-times { display: flex; justify-content: space-between; gap: 6px; font-variant-numeric: tabular-nums; }
+    .time-in { color: #6ee7b7; font-weight: 600; }
+    .time-out { color: #7dd3fc; font-weight: 600; }
+    .box-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 
-    .badge { font-size: 0.68rem; padding: 2px 6px; border-radius: 999px; font-weight: 700; }
+    .badge { font-size: 0.68rem; padding: 2px 7px; border-radius: 999px; font-weight: 700; white-space: nowrap; }
     .badge-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
     .badge-lock { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
     .badge-pend { background: rgba(245, 158, 11, 0.22); color: #fcd34d; }
@@ -237,7 +241,6 @@
       </div>
     </div>
 
-    <!-- Selector de dies de la setmana (visible només si durada = weekly) -->
     <div id="daysPicker" class="days-picker">
       <label data-i18n="pickDaysLabel">Selecciona els dies autoritzats (24 h cada dia):</label>
       <div class="days-grid" id="daysGrid"></div>
@@ -261,7 +264,7 @@
     </button>
   </section>
 
-  <!-- 2. OBERTURA MANUAL, PRESÈNCIA EN VIU I BLOQUEJOS -->
+  <!-- 2. OBERTURA MANUAL, PRESÈNCIA EN VIU I BLOQUEJOS (2 PER FILA) -->
   <section class="card">
     <div class="card-title">
       <span data-i18n="remoteControl">Obertura remota i presència</span>
@@ -275,7 +278,7 @@
         🔒 Bloquejar TOT
       </button>
     </div>
-    <div class="grid-3" id="boxesGrid"></div>
+    <div class="grid-2" id="boxesGrid"></div>
   </section>
 
   <!-- 3. REGISTRE VISUAL D'ENTRADES I SORTIDES + REGISTRE TÈCNIC -->
@@ -317,7 +320,6 @@
   const TOPIC_EVENTS = "local/acceso/eventos";
   const TOPIC_STATE  = "local/acceso/estado";
 
-  // Ordre visual: DL(1), DT(2), DC(3), DJ(4), DV(5), DS(6), DG(0)
   const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
   const DAY_LABELS = {
     ca: { 1:"DL", 2:"DT", 3:"DC", 4:"DJ", 5:"DV", 6:"DS", 0:"DG" },
@@ -349,7 +351,7 @@
       selFree: "🟢 Lliure", selBusy: "🟠 Ocupat", gymName: "🏋️ Gimnàs",
       selMainOnly: "🚪 Només Porta Principal (Clauer)", mainDoorTag: "🚪 Porta Principal",
       keyfobBadge: "Clauer / Fix", weeklyBadge: "Setmanal",
-      outsideLabel: "⚪ Fora", insideLabel: "🟢 DINS",
+      noActivityBox: "Sense moviments", insideLabel: "🟢 DINS",
       confirmBusyBox: (d) => `${d} ja té un codi actiu. Vols crear-ne un altre igualment?`,
       activePinsTitle: "Codis i clauers actius", btnForceSync: "↻ Reenviar",
       liveEvents: "Control d'entrades i sortides", btnClear: "Netejar",
@@ -391,7 +393,7 @@
       selFree: "🟢 Libre", selBusy: "🟠 Ocupado", gymName: "🏋️ Gimnasio",
       selMainOnly: "🚪 Solo Puerta Principal (Llavero)", mainDoorTag: "🚪 Puerta Principal",
       keyfobBadge: "Llavero / Fijo", weeklyBadge: "Semanal",
-      outsideLabel: "⚪ Fuera", insideLabel: "🟢 DENTRO",
+      noActivityBox: "Sin movimientos", insideLabel: "🟢 DENTRO",
       confirmBusyBox: (d) => `${d} ya tiene un código activo. ¿Quieres crear otro igualmente?`,
       activePinsTitle: "Códigos y llaveros activos", btnForceSync: "↻ Reenviar",
       liveEvents: "Control de entradas y salidas", btnClear: "Limpiar",
@@ -420,6 +422,7 @@
   let sistemaBloqueado = JSON.parse(localStorage.getItem("pwa_sys_lock") || "false");
   let boxBloqueado = JSON.parse(localStorage.getItem("pwa_box_lock") || "[false,false,false,false,false,false,false]");
   if (boxBloqueado.length < 7) while (boxBloqueado.length < 7) boxBloqueado.push(false);
+  let boxStats = JSON.parse(localStorage.getItem("pwa_box_stats") || "{}");
   let logs = JSON.parse(localStorage.getItem("pwa_logs") || "[]");
   let ioLogs = JSON.parse(localStorage.getItem("pwa_io_logs") || "[]");
   let stateUpdatedAt = Number(localStorage.getItem("pwa_state_ts") || "0");
@@ -518,7 +521,7 @@
     stateUpdatedAt = Date.now();
     localStorage.setItem("pwa_state_ts", String(stateUpdatedAt));
     client.publish(TOPIC_STATE, JSON.stringify({
-      updatedAt: stateUpdatedAt, accesos, sistemaBloqueado, boxBloqueado, ioLogs: ioLogs.slice(0, 30)
+      updatedAt: stateUpdatedAt, accesos, sistemaBloqueado, boxBloqueado, boxStats, ioLogs: ioLogs.slice(0, 30)
     }), { qos: 1, retain: true });
   }
 
@@ -533,6 +536,10 @@
     if (Array.isArray(snapshot.boxBloqueado)) {
       boxBloqueado = snapshot.boxBloqueado;
       while (boxBloqueado.length < 7) boxBloqueado.push(false);
+    }
+    if (snapshot.boxStats && typeof snapshot.boxStats === "object") {
+      boxStats = snapshot.boxStats;
+      localStorage.setItem("pwa_box_stats", JSON.stringify(boxStats));
     }
     if (Array.isArray(snapshot.ioLogs) && snapshot.ioLogs.length > 0) {
       ioLogs = snapshot.ioLogs;
@@ -583,10 +590,12 @@
     const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const horaFull = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     const fechaCorta = new Date().toLocaleDateString(lang === "ca" ? "ca-ES" : "es-ES", { day: "2-digit", month: "2-digit" });
+    const pinStr = String(ev.detalle || "").trim();
+    const boxNum = Number(ev.box || 0);
 
-    if ((ev.tipo === "entrada" || ev.tipo === "salida") && ev.detalle) {
-      let acc = accesos.find(a => a.pin === ev.detalle);
-      let nombre = acc && acc.nota ? acc.nota : `PIN ${ev.detalle}`;
+    if ((ev.tipo === "entrada" || ev.tipo === "salida") && pinStr) {
+      let acc = accesos.find(a => String(a.pin) === pinStr);
+      let nombre = acc && acc.nota ? acc.nota : `PIN ${pinStr}`;
       let estanciaTxt = "";
 
       if (acc) {
@@ -606,29 +615,54 @@
             estanciaTxt = formatearDuracion(ahoraSec - acc.tsEntrada);
           }
           acc.dentro = false;
-          acc.horaEntrada = "";
+          acc.horaSalida = hora;
           acc.tsEntrada = 0;
         }
-        saveState();
-        renderPins();
+      }
+
+      if (boxNum >= 1 && boxNum <= 6) {
+        const prev = boxStats[boxNum] || {};
+        if (ev.tipo === "entrada") {
+          boxStats[boxNum] = {
+            pin: pinStr,
+            nombre: acc && acc.nota ? acc.nota : "",
+            entrada: hora,
+            salida: "",
+            dentro: true
+          };
+        } else {
+          boxStats[boxNum] = {
+            pin: pinStr,
+            nombre: acc && acc.nota ? acc.nota : (prev.nombre || ""),
+            entrada: (prev.pin === pinStr && prev.entrada) ? prev.entrada : "—",
+            salida: hora,
+            dentro: false
+          };
+        }
+        localStorage.setItem("pwa_box_stats", JSON.stringify(boxStats));
       }
 
       ioLogs.unshift({
         tipo: ev.tipo,
         nombre,
-        pin: ev.detalle,
-        box: ev.box || 0,
+        pin: pinStr,
+        box: boxNum,
         hora: `${fechaCorta} ${hora}`,
         estancia: estanciaTxt
       });
       if (ioLogs.length > 40) ioLogs.pop();
       localStorage.setItem("pwa_io_logs", JSON.stringify(ioLogs));
+
+      saveState();
+      renderPins();
       renderIOLogs();
       publicarEstadoNube();
     }
 
     if (ev.tipo === "reset_medianoche") {
-      accesos.forEach(a => { a.dentro = false; a.horaEntrada = ""; a.tsEntrada = 0; });
+      accesos.forEach(a => { a.dentro = false; a.tsEntrada = 0; });
+      Object.keys(boxStats).forEach(k => { if (boxStats[k]) boxStats[k].dentro = false; });
+      localStorage.setItem("pwa_box_stats", JSON.stringify(boxStats));
       saveState();
       renderPins();
     }
@@ -637,18 +671,18 @@
       saveState();
       renderSecurity();
     }
-    if (ev.tipo === "estado_bloqueo_box" && ev.box >= 1 && ev.box <= 6) {
-      boxBloqueado[ev.box] = (ev.detalle === "BLOQUEADO");
+    if (ev.tipo === "estado_bloqueo_box" && boxNum >= 1 && boxNum <= 6) {
+      boxBloqueado[boxNum] = (ev.detalle === "BLOQUEADO");
       saveState();
       renderSecurity();
     }
 
     const isErr = ev.tipo.startsWith("denegado");
     const isOk = ev.tipo === "entrada" || ev.tipo === "salida" || ev.tipo.includes("abre") || ev.tipo === "online";
-    const destLog = ev.box ? `(${ev.box === 6 ? "Gimnàs" : "Box " + ev.box})` : "";
+    const destLog = boxNum ? `(${boxNum === 6 ? "Gimnàs" : "Box " + boxNum})` : "";
     logs.unshift({
       hora: horaFull,
-      texto: `${ev.tipo} ${destLog} — ${ev.detalle || ""}`,
+      texto: `${ev.tipo} ${destLog} — ${pinStr}`,
       cls: isErr ? "err" : (isOk ? "ok" : "")
     });
     if (logs.length > 40) logs.pop();
@@ -659,7 +693,7 @@
   function genRandomPin() {
     let pin;
     do { pin = String(Math.floor(1000 + Math.random() * 9000)); }
-    while (accesos.some(a => a.pin === pin));
+    while (accesos.some(a => String(a.pin) === pin));
     document.getElementById("inpPin").value = pin;
   }
 
@@ -696,10 +730,10 @@
     const duracionSec = mins * 60;
     const finInicialSec = (diasMask > 0) ? (ahoraSec + 315360000) : ((box >= 1) ? (ahoraSec + 7 * 86400) : (ahoraSec + duracionSec));
 
-    accesos = accesos.filter(a => a.pin !== pin);
+    accesos = accesos.filter(a => String(a.pin) !== pin);
     accesos.unshift({
       pin, box, inicio: ahoraSec - 60, fin: finInicialSec, duracion: duracionSec,
-      usado: false, diasMask, dentro: false, horaEntrada: "", tsEntrada: 0, nota
+      usado: false, diasMask, dentro: false, horaEntrada: "", horaSalida: "", tsEntrada: 0, nota
     });
 
     document.getElementById("inpNote").value = "";
@@ -711,7 +745,7 @@
 
   function revocarPin(pin) {
     if (!confirm(I18N[lang].confirmRevoke)) return;
-    accesos = accesos.filter(a => a.pin !== pin);
+    accesos = accesos.filter(a => String(a.pin) !== String(pin));
     saveState();
     renderPins();
     syncListaConESP32();
@@ -719,7 +753,7 @@
 
   function syncListaConESP32() {
     const payloadLista = accesos.map(a => ({
-      pin: a.pin, box: a.box, inicio: a.inicio, fin: a.fin,
+      pin: String(a.pin), box: a.box, inicio: a.inicio, fin: a.fin,
       duracion: a.duracion || (a.fin - a.inicio), usado: a.usado,
       diasMask: a.diasMask || 0, dentro: Boolean(a.dentro), ultMov: a.tsEntrada || 0
     }));
@@ -735,7 +769,7 @@
   }
 
   function enviarWhatsApp(pin) {
-    const acc = accesos.find(a => a.pin === pin);
+    const acc = accesos.find(a => String(a.pin) === String(pin));
     if (!acc || acc.box === 0) return;
     const destClean = acc.box === 6 ? (lang === "ca" ? "el Gimnàs" : "el Gimnasio") : `el Box ${acc.box}`;
     let text = "";
@@ -791,7 +825,8 @@
     for (let i = 1; i <= 6; i++) {
       const locked = boxBloqueado[i];
       const ocupado = isBoxOcupado(i);
-      const usuarioDentro = accesos.find(a => a.box === i && a.dentro);
+      const st = boxStats[i] || null;
+      const usuarioDentro = accesos.find(a => a.box === i && a.dentro) || (st && st.dentro ? st : null);
 
       const div = document.createElement("div");
       div.className = "box-item" + (locked ? " locked" : (usuarioDentro ? " inside" : (ocupado ? " occupied" : "")));
@@ -801,20 +836,30 @@
       const openBtnClass = ocupado ? "btn-occupied" : "btn-primary";
       const tituloCard = i === 6 ? t.gymName : `Box ${i}`;
 
-      const presTxt = usuarioDentro
-        ? `${t.insideLabel} · ${usuarioDentro.nota || usuarioDentro.pin}${usuarioDentro.horaEntrada ? " (" + usuarioDentro.horaEntrada + ")" : ""}`
-        : t.outsideLabel;
+      let infoHtml = `<div style="text-align:center; opacity:0.65;">${t.noActivityBox}</div>`;
+      if (st && st.pin) {
+        const nomTxt = st.nombre ? ` · ${st.nombre}` : "";
+        infoHtml = `
+          <div class="box-info-pin">🔑 ${st.pin}${nomTxt}</div>
+          <div class="box-info-times">
+            <span class="time-in">🟢 E: ${st.entrada || "—"}</span>
+            <span class="time-out">🔵 S: ${st.salida || "—"}</span>
+          </div>
+        `;
+      }
 
       div.innerHTML = `
         <div class="box-head">
           <span>${tituloCard}</span>
           <span class="badge ${badgeClass}">${badgeText}</span>
         </div>
-        <div class="presence-pill ${usuarioDentro ? "in" : ""}">${presTxt}</div>
-        <button class="${openBtnClass} btn-sm" onclick="cmdAbrirBox(${i})">🚪 ${t.openBox}</button>
-        <button class="${locked ? "btn-warning" : "btn-ghost"} btn-sm" onclick="toggleBoxLock(${i})">
-          ${locked ? "🔓 " + t.unlockBox : "🔒 " + t.lockBox}
-        </button>
+        <div class="box-info">${infoHtml}</div>
+        <div class="box-actions">
+          <button class="${openBtnClass} btn-sm" onclick="cmdAbrirBox(${i})">🚪 ${t.openBox}</button>
+          <button class="${locked ? "btn-warning" : "btn-ghost"} btn-sm" onclick="toggleBoxLock(${i})">
+            ${locked ? "🔓 " + t.unlockBox : "🔒 " + t.lockBox}
+          </button>
+        </div>
       `;
       grid.appendChild(div);
     }
@@ -915,8 +960,11 @@
   function clearLogs() {
     if (currentLogTab === "io") {
       ioLogs = [];
+      boxStats = {};
       localStorage.setItem("pwa_io_logs", "[]");
+      localStorage.setItem("pwa_box_stats", "{}");
       renderIOLogs();
+      renderSecurity();
       publicarEstadoNube();
     } else {
       logs = [];
